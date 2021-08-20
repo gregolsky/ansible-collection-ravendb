@@ -5,6 +5,6 @@ ravendb_server_version: latest
 ravendb_server_version_minor: 5.2
 ravendb_server_release_channel: stable
 
-ravendb_run_unsecured: no
+ravendb_server_settings_preset: local_setup
 
 

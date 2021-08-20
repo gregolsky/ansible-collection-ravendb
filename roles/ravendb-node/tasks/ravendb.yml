@@ -48,6 +48,16 @@
       url: "{{ ravendb_download_url }}"
       dest: /tmp/ravendb.tar.bz2
 
+- name: Populate service facts
+  service_facts:
+
+- name: Stop RavenDB service
+  service:
+    name: ravendb
+    enabled: yes
+    state: stopped
+  when: "'ravendb' in services"  
+
 - name: Unpack RavenDB server binaries
   ansible.builtin.unarchive:
     src: /tmp/ravendb.tar.bz2
@@ -58,11 +68,12 @@
 
 - name: Template settings.json out 
   ansible.builtin.template:
-          src: settings.json.j2
+          src: "settings.{{ ravendb_server_settings_preset }}.json.j2"
           dest: /etc/ravendb/settings.json
           owner: root # depending on whether we do setup we want ravendb or root here
           group: ravendb
           mode: '0640'
+    
 
 - name: Template ravendb.service out 
   ansible.builtin.template:

@@ -3,4 +3,6 @@
   remote_user: root
   roles:
     - role: "/home/gregolsky/Dev/ansible-collection-ravendb/gregolsky/ravendb/roles/ravendb-node"
+      vars:
+        ravendb_server_settings_preset: unsecured
     #- ravendb-node
