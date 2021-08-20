@@ -2,3 +2,5 @@
   ansible.builtin.yum:
     name: bzip2
     state: present
+
+# TODO install .NET runtime deps

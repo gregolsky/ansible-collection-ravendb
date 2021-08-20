@@ -27,11 +27,6 @@
     - "/var/lib/ravendb/nuget"
     - "/usr/lib/ravendb/server"
 
-- name: Remove old file
-  file:
-    name: /tmp/ravendb.tar.bz2
-    state: absent
-
 - name: Determine download url for latest version
   set_fact:
     ravendb_download_url: "https://hibernatingrhinos.com/downloads/RavenDB%20for%20Linux%20x64/latest?buildType={{ ravendb_server_release_channel }}&version={{ ravendb_server_version_minor }}"
@@ -40,7 +35,10 @@
 - name: Determine download url for exact version
   set_fact:
     ravendb_download_url: "https://daily-builds.s3.amazonaws.com/RavenDB-{{ ravendb_server_version }}-linux-x64.tar.bz2"
-  when: ravendb_server_version != ""
+  when: ravendb_server_version != "latest"
+
+- debug:
+    msg: "Downloading RavenDB {{ ravendb_server_version }}"
 
 # TODO allow select arch
 # TODO allow select version
@@ -74,6 +72,12 @@
     group: root
     mode: '0644'
 
-- name: Just force systemd to reread configs (2.4 and above)
+- name: Reread systemd configs
   ansible.builtin.systemd:
     daemon_reload: yes
+
+- name: Restart RavenDB service
+  service:
+    name: ravendb
+    enabled: yes
+    state: restarted
