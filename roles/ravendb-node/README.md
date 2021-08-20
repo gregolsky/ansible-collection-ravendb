@@ -32,5 +32,5 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: ravendb_cluster
       roles:
-         - { role: gregolsky.ravendb, ravendb_server_version: 5.2.2 }
+         - { role: gregolsky.ravendb.ravendb-node, ravendb_server_version: 5.2.2 }
 
