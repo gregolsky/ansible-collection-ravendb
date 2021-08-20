@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - role: "/home/gregolsky/Dev/ansible-collection-ravendb/gregolsky/ravendb/roles/ravendb-node"
+    #- ravendb-node

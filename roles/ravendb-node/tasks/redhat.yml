@@ -1,0 +1,4 @@
+- name: Install prerequisites [RedHat]
+  ansible.builtin.yum:
+    name: bzip2
+    state: present

@@ -1,0 +1,10 @@
+---
+# defaults file for ravendb-node
+
+ravendb_server_version: latest
+ravendb_server_version_minor: 5.2
+ravendb_release_channel: stable
+
+ravendb_run_unsecured: no
+
+
