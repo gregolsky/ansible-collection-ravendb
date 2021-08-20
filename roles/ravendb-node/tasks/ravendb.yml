@@ -47,7 +47,7 @@
 # TODO allow select release channel
 - name: Download RavenDB server binaries
   ansible.builtin.get_url:
-      url: 
+      url: "{{ ravendb_download_url }}"
       dest: /tmp/ravendb.tar.bz2
 
 - name: Unpack RavenDB server binaries
