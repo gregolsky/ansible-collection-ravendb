@@ -17,7 +17,7 @@ ravendb_server_version: latest
 ravendb_server_version_minor: 5.2
 ravendb_server_release_channel: stable
 
-ravendb_run_unsecured: no
+ravendb_server_settings_preset: local_setup
 ```
 
 Dependencies
@@ -30,9 +30,9 @@ Example Playbook
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
+    - hosts: ravendb_cluster
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: gregolsky.ravendb, ravendb_server_version: 5.2.2 }
 
 License
 -------
