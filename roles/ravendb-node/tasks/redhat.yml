@@ -4,3 +4,4 @@
     state: present
 
 # TODO install .NET runtime deps
+# https://docs.microsoft.com/pl-pl/dotnet/core/install/linux-centos
