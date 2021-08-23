@@ -1,0 +1,29 @@
+{% set secured = ravendb_server_certificate_file is defined and ravendb_server_certificate_file|length -%}
+{% set has_domain = ravendb_server_domain is defined and ravendb_server_domain|length -%}
+{% set has_node_tag = ravendb_server_node_tag is defined and ravendb_server_node_tag|length -%}
+{% set http_scheme = "https" if secured else "http" -%}
+{% set public_url = (
+    "{{ http_scheme }}://{{ ravendb_server_node_tag }}.{{ ravendb_server_domain }}:{{ ravendb_server_https_port }}" 
+    if has_node_tag and has_domain
+    else ravendb_public_server_url ) -%}
+{% set public_url_tcp = (
+    "tcp://{{ ravendb_server_node_tag }}.{{ ravendb_server_domain }}"
+    if has_node_tag and has_domain
+    else ravendb_public_server_url_tcp) -%}
+{
+    "Setup.Mode": "None",
+
+    "ServerUrl": "{{ http_scheme }}://0.0.0.0:{{ ravendb_server_https_port }}",
+    "ServerUrl.Tcp": "tcp://0.0.0.0:{{ ravendb_server_tcp_port }}",
+
+    "PublicServerUrl": "{{ public_url }}",
+    "PublicServerUrl.Tcp": "{{ public_url_tcp }}",
+
+    "Logs.RetentionTimeInHrs": 336,
+{% if (secured) -%}
+    "Security.Certificate.Path": "/etc/ravendb/security/server.pfx",
+{%- endif %}
+    "Security.AuditLog.Compress": true,
+    "Security.AuditLog.RetentionTimeInHrs": "52560",
+    "License.Eula.Accepted": true
+}

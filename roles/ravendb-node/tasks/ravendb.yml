@@ -41,8 +41,6 @@
     msg: "Downloading RavenDB {{ ravendb_server_version }}"
 
 # TODO allow select arch
-# TODO allow select version
-# TODO allow select release channel
 - name: Download RavenDB server binaries
   ansible.builtin.get_url:
       url: "{{ ravendb_download_url }}"
@@ -73,6 +71,15 @@
           owner: root # depending on whether we do setup we want ravendb or root here
           group: ravendb
           mode: '0640'
+
+- name: Copy RavenDB server certificate file
+  ansible.builtin.copy:
+    src: "{{ ravendb_server_certificate_file }}"
+    dest: /etc/ravendb/security/certificate.pfx
+    owner: ravendb # server needs to be able to renew the cert in some scenarios 
+    group: ravendb
+    mode: '0640'
+  when: ravendb_server_certificate_file|length > 0
     
 
 - name: Template ravendb.service out 

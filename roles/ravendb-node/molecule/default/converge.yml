@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include ravendb-node"
+      include_role:
+        name: "ravendb-node"

@@ -1,8 +1,9 @@
 ---
 # vars file for ravendb-node
 
-ravendb_server_url_unsecured: http://0.0.0.0:8080
-ravendb_setup_mode_unsecured: None
+ravendb_server_http_port: 80
+ravendb_server_https_port: 443
+ravendb_server_tcp_port: 38888
 
-ravendb_server_url_secured: https://0.0.0.0:443
-ravendb_setup_mode: None
+ravendb_server_public_url: None
+ravendb_server_public_url_tcp: None

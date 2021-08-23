@@ -1,10 +1,23 @@
 ---
 # defaults file for ravendb-node
 
+# common variables
 ravendb_server_version: latest
 ravendb_server_version_minor: 5.2
 ravendb_server_release_channel: stable
 
-ravendb_server_settings_preset: local_setup
+# settings options
+ravendb_server_settings_preset: default
+ravendb_server_settings_file: None # TODO allow to send user's settings file
+ravendb_server_settings_overrides: None # TODO allow to override by key-value list
+
+# secure setup variables
+ravendb_server_certificate_file: None
+ravendb_server_domain: None
+ravendb_server_node_tag: None
+
+# other secure scenarios
+# ravendb_server_certificate_renew_script: None
+
 
 
