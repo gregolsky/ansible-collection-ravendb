@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: ravendb-node
+  role_name: ravendb_node
   namespace: gregolsky
   author: Grzegorz Lachowski
   description: RavenDB cluster node

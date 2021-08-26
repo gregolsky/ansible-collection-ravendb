@@ -1,0 +1,49 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  # - name: centos
+  #   image: jrei/systemd-centos:7
+  #   capabilities:
+  #     - SYS_ADMIN
+  #   pid_mode: host
+  #   privileged: true
+  #   volumes:
+  #     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  # - name: ubuntu-bionic
+  #   image: jrei/systemd-ubuntu:18.04
+  #   capabilities:
+  #     - SYS_ADMIN
+  #   pid_mode: host
+  #   privileged: true
+  #   volumes:
+  #     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: ubuntu-focal
+    image: jrei/systemd-ubuntu:18.04
+    capabilities:
+      - SYS_ADMIN
+    pid_mode: host
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+provisioner:
+  name: ansible
+  log: true
+  lint:
+    name: ansible-lint
+scenario:
+  name: unsecured
+  idempotent: false
+  test_sequence:
+    - destroy
+    - create
+    - converge
+    - lint
+    - verify
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+

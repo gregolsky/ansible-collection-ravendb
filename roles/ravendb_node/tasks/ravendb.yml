@@ -1,0 +1,170 @@
+- name: Determine download url for latest version
+  set_fact:
+    ravendb_download_url: "https://hibernatingrhinos.com/downloads/RavenDB%20for%20Linux%20x64/latest?buildType={{ ravendb_server_release_channel }}&version={{ ravendb_server_version_minor }}"
+  when: ravendb_server_version == "latest"
+
+- name: Determine download url for exact version
+  set_fact:
+    ravendb_download_url: "https://daily-builds.s3.amazonaws.com/RavenDB-{{ ravendb_server_version }}-linux-x64.tar.bz2"
+  when: ravendb_server_version != "latest"
+
+# TODO allow select arch
+- name: Download RavenDB server binaries
+  ansible.builtin.get_url:
+      url: "{{ ravendb_download_url }}"
+      dest: /tmp/ravendb.tar.bz2
+
+- name: Populate service facts
+  service_facts:
+
+- name: Stop RavenDB service
+  become: true
+  service:
+    name: ravendb
+    enabled: yes
+    state: stopped
+  when: "'ravendb' in services"  
+
+- name: Create ravendb group
+  become: yes
+  ansible.builtin.group:
+    name: ravendb
+    state: present
+
+- name: Create ravendb user
+  become: yes
+  ansible.builtin.user:
+    name: ravendb
+    state: present
+    comment: RavenDB Server user
+    groups: ravendb
+    append: yes
+
+- name: Prepare directory structure - perms 550
+  become: yes
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: ravendb
+    mode: '550' # TODO security, fix permissions to be like in DEB
+    state: directory
+  loop:
+    - "/usr/lib/ravendb/server"
+    - "/usr/lib/ravendb/server/libmscordaccore"
+    - "/var/lib/ravendb"
+
+- name: Prepare directory structure - perms 770
+  become: yes
+  file:
+    path: "{{ item }}"
+    owner: ravendb
+    group: ravendb
+    mode: '0770' # TODO security, fix permissions to be like in DEB
+    state: directory
+  loop:
+    - "/etc/ravendb"
+    - "/etc/ravendb/security"
+    - "/var/lib/ravendb/nuget"
+    - "/var/lib/ravendb/data"
+    - "/var/log/ravendb/audit"
+    - "/var/log/ravendb/logs"
+
+- name: Unpack RavenDB server binaries
+  become: yes
+  ansible.builtin.unarchive:
+    remote_src: yes
+    src: /tmp/ravendb.tar.bz2
+    dest: /usr/lib/ravendb/server
+    extra_opts:
+        - --transform
+        - s/^RavenDB\/Server//
+
+- name: Prepare directory structure - perms 550
+  become: yes
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: ravendb
+    mode: '550' # TODO security, fix permissions to be like in DEB
+    state: directory
+  loop:
+    - "/usr/lib/ravendb/server"
+
+- name: Template settings.json out 
+  become: yes
+  ansible.builtin.template:
+    src: "settings.{{ ravendb_server_settings_preset }}.json.j2"
+    dest: /etc/ravendb/settings.json
+    owner: root 
+    group: ravendb
+    mode: '0640'
+
+- name: Copy RavenDB server certificate file
+  become: yes
+  ansible.builtin.copy:
+    src: "{{ ravendb_server_certificate_file }}"
+    dest: /etc/ravendb/security/certificate.pfx
+    owner: ravendb # server needs to be able to renew the cert in some scenarios 
+    group: ravendb
+    mode: '0640'
+  when: ravendb_server_certificate_file | default('', true) | trim != ''
+
+- name: Copy arch specific files
+  ansible.builtin.copy:
+    remote_src: yes
+    src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_server_arch}}.so"
+    dest: "/usr/lib/ravendb/server/{{ item }}.so"
+    owner: root
+    group: ravendb
+    mode: '0644'
+  loop:
+    - librvnpal
+    - libsodium
+
+- name: Remove redundant sos
+  become: yes
+  ansible.builtin.shell: find . -maxdepth 1 -type f -name "librvnpal.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+
+- name: Remove redundant sos
+  become: yes
+  ansible.builtin.shell: find . -maxdepth 1 -type f -name "libsodium.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+
+- name: Clear default settings json
+  ansible.builtin.copy:
+    content: '{}'
+    dest: "/usr/lib/ravendb/server/settings.default.json"
+    force: yes
+    owner: root
+    group: ravendb
+    mode: '0644'
+
+- name: Adjust binaries permissions
+  become: yes
+  ansible.builtin.shell: find /usr/lib/ravendb/server -type f -exec chmod 644 {} +
+
+- name: Adjust bin permissions
+  ansible.builtin.file:
+    name: "{{ item }}"
+    mode: '0550'
+  loop:
+    - "usr/lib/ravendb/server/Raven.Server"
+    - "usr/lib/ravendb/server/rvn"
+    - "usr/lib/ravendb/server/Raven.Debug"
+    - "usr/lib/ravendb/server/createdump"
+
+- name: Template ravendb.service out 
+  become: yes
+  ansible.builtin.template:
+    src: ravendb.service.j2
+    dest: /etc/systemd/system/ravendb.service
+    owner: root
+    group: root
+    mode: '0640'
+
+- name: Restart RavenDB service
+  become: true
+  service:
+    name: ravendb
+    enabled: yes
+    daemon_reload: yes
+    state: restarted
