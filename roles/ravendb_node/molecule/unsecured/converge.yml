@@ -7,6 +7,3 @@
         name: "ravendb_node"
       vars:
         ravendb_server_settings_preset: unsecured
-
-    - name: Call it
-      shell: curl http://localhost/studio/index.html

@@ -19,6 +19,3 @@ ravendb_server_node_tag:
 
 # other secure scenarios
 # ravendb_server_certificate_renew_script: None
-
-
-

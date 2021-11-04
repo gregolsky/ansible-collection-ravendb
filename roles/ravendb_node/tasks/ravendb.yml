@@ -24,6 +24,13 @@
     enabled: yes
     state: stopped
   when: "'ravendb' in services"  
+  
+- name: Set vm.swappiness
+  sysctl:
+    name: vm.swappiness
+    value: '5'
+    state: present
+  when: molecule is not defined
 
 - name: Create ravendb group
   become: yes
@@ -107,12 +114,12 @@
     owner: ravendb # server needs to be able to renew the cert in some scenarios 
     group: ravendb
     mode: '0640'
-  when: ravendb_server_certificate_file | default('', true) | trim != ''
+  when: ravendb_server_certificate_file | default('', true) | length > 0
 
 - name: Copy arch specific files
   ansible.builtin.copy:
     remote_src: yes
-    src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_server_arch}}.so"
+    src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_server_arch }}.so"
     dest: "/usr/lib/ravendb/server/{{ item }}.so"
     owner: root
     group: ravendb
@@ -120,14 +127,21 @@
   loop:
     - librvnpal
     - libsodium
+    - libzstd
 
 - name: Remove redundant sos
   become: yes
-  ansible.builtin.shell: find . -maxdepth 1 -type f -name "librvnpal.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+  ansible.builtin.shell: find . -maxdepth 1 -type f -name "{{ item }}.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+  changed_when: true
+  loop:
+    - librvnpal
+    - libsodium
+    - libzstd
 
-- name: Remove redundant sos
-  become: yes
-  ansible.builtin.shell: find . -maxdepth 1 -type f -name "libsodium.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+# - name: Remove redundant sos
+#   become: yes
+#   ansible.builtin.shell: find . -maxdepth 1 -type f -name "libsodium.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+#   changed_when: true
 
 - name: Clear default settings json
   ansible.builtin.copy:
@@ -140,17 +154,42 @@
 
 - name: Adjust binaries permissions
   become: yes
-  ansible.builtin.shell: find /usr/lib/ravendb/server -type f -exec chmod 644 {} +
+  ansible.builtin.file:
+    dest: /usr/lib/ravendb/server
+    owner: root
+    group: ravendb
+    mode: '0644'
+    recurse: yes
 
-- name: Adjust bin permissions
+- name: Adjust executables permissions
   ansible.builtin.file:
     name: "{{ item }}"
-    mode: '0550'
+    owner: root
+    group: ravendb
+    mode: u=rx,g=rx
   loop:
     - "usr/lib/ravendb/server/Raven.Server"
     - "usr/lib/ravendb/server/rvn"
     - "usr/lib/ravendb/server/Raven.Debug"
     - "usr/lib/ravendb/server/createdump"
+
+- name: Adjust directories permissions
+  file:
+    path: /usr/lib/ravendb
+    mode: u=rX,g=rX
+    recurse: yes
+
+- name: Check that the somefile.conf exists
+  stat:
+    path: /usr/sbin/getcap
+  register: getcap_stat
+
+- name: Set capabilities
+  community.general.capabilities:
+    path: /usr/lib/ravendb/server/Raven.Server 
+    capability: CAP_NET_BIND_SERVICE=+eip 
+    state: present
+  when: getcap_stat.stat.exists
 
 - name: Template ravendb.service out 
   become: yes
@@ -163,8 +202,8 @@
 
 - name: Restart RavenDB service
   become: true
-  service:
-    name: ravendb
+  ansible.builtin.systemd:
+    name: ravendb.service
     enabled: yes
     daemon_reload: yes
     state: restarted
