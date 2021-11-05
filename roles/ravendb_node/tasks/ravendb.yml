@@ -138,11 +138,6 @@
     - libsodium
     - libzstd
 
-# - name: Remove redundant sos
-#   become: yes
-#   ansible.builtin.shell: find . -maxdepth 1 -type f -name "libsodium.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
-#   changed_when: true
-
 - name: Clear default settings json
   ansible.builtin.copy:
     content: '{}'
