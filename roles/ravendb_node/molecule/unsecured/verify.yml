@@ -28,12 +28,13 @@
         url: http://localhost/databases
       register: databases
 
-    - set_fact:
-        dbName: "db{{ 1000000 | random }}"
+    - name: Set random DB name
+      set_fact:
+        db_name: "db{{ 1000000 | random }}"
     
     - name: Create a database
       ansible.builtin.uri:
-        url: "http://localhost/admin/databases?name={{ dbName }}&replicationFactor=1"
+        url: "http://localhost/admin/databases?name={{ db_name }}&replicationFactor=1"
         method: PUT
         body_format: json
-        body: "{\"DatabaseName\":\"{{ dbName }}\",\"Settings\":{},\"Disabled\":false,\"Encrypted\":false,\"Topology\":{\"DynamicNodesDistribution\":false}}"
+        body: "{\"DatabaseName\":\"{{ db_name }}\",\"Settings\":{},\"Disabled\":false,\"Encrypted\":false,\"Topology\":{\"DynamicNodesDistribution\":false } }"
