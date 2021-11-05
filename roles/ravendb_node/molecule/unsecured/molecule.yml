@@ -27,7 +27,7 @@ scenario:
     - lint
     - destroy
     - create
-    - setup_unsecured
+    - converge
     - verify
 verifier:
   name: ansible
