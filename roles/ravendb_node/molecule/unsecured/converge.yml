@@ -6,7 +6,7 @@
       include_role:
         name: "ravendb_node"
       vars:
-        ravendb_server_settings_preset: unsecured
-        ravendb_server_settings_override:
+        ravendb_settings_preset: unsecured
+        ravendb_settings_override:
           Indexing.MapBatchSize: 1024
           Logs.Mode: "Information"

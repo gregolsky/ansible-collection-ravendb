@@ -12,12 +12,12 @@ Role Variables
 --------------
 
 ```
-ravendb_server_version: latest
+ravendb_version: latest
 
-ravendb_server_version_minor: 5.2
-ravendb_server_release_channel: stable
+ravendb_version_minor: 5.2
+ravendb_release_channel: stable
 
-ravendb_server_settings_preset: local_setup
+ravendb_settings_preset: local_setup
 ```
 
 Dependencies
@@ -32,5 +32,5 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: ravendb_cluster
       roles:
-         - { role: gregolsky.ravendb.ravendb-node, ravendb_server_version: 5.2.2 }
+         - { role: gregolsky.ravendb.ravendb-node, ravendb_version: 5.2.2 }
 

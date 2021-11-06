@@ -1,12 +1,12 @@
 - name: Determine download url for latest version
   set_fact:
-    ravendb_download_url: "https://hibernatingrhinos.com/downloads/RavenDB%20for%20Linux%20x64/latest?buildType={{ ravendb_server_release_channel }}&version={{ ravendb_server_version_minor }}"
-  when: ravendb_server_version == "latest"
+    ravendb_download_url: "https://hibernatingrhinos.com/downloads/RavenDB%20for%20Linux%20x64/latest?buildType={{ ravendb_release_channel }}&version={{ ravendb_version_minor }}"
+  when: ravendb_version == "latest"
 
 - name: Determine download url for exact version
   set_fact:
-    ravendb_download_url: "https://daily-builds.s3.amazonaws.com/RavenDB-{{ ravendb_server_version }}-linux-x64.tar.bz2"
-  when: ravendb_server_version != "latest"
+    ravendb_download_url: "https://daily-builds.s3.amazonaws.com/RavenDB-{{ ravendb_version }}-linux-x64.tar.bz2"
+  when: ravendb_version != "latest"
 
 # TODO allow select arch
 - name: Download RavenDB server binaries
@@ -101,7 +101,7 @@
 - name: Template settings.json out 
   become: yes
   ansible.builtin.template:
-    src: "settings.{{ ravendb_server_settings_preset }}.json.j2"
+    src: "settings.{{ ravendb_settings_preset }}.json.j2"
     dest: /etc/ravendb/settings.json
     owner: root 
     group: ravendb
@@ -110,18 +110,18 @@
 - name: Settings override to temp file
   become: yes
   ansible.builtin.copy:
-    content: "{{ ravendb_server_settings_override | to_json }}"
+    content: "{{ ravendb_settings_override | to_json }}"
     dest: /tmp/ravendb_settings_override.json
     mode: 0700
-  when: ravendb_server_settings_override.keys() | length > 0
+  when: ravendb_settings_override.keys() | length > 0
 
 - name: Apply settings overrides
   become: yes
   command: >
     jq -S -s '.[0] + .[1]' "/etc/ravendb/settings.json" "/tmp/ravendb_settings_override.json"
-  when: ravendb_server_settings_override.keys() | length > 0
+  when: ravendb_settings_override.keys() | length > 0
   register: overriden_settings
-  # with_items: "{{ ravendb_server_settings_override.keys() | list }}"
+  # with_items: "{{ ravendb_settings_override.keys() | list }}"
 
 - name: Write settings
   become: yes
@@ -131,22 +131,22 @@
     owner: root
     group: ravendb
     mode: '0640'
-  when: ravendb_server_settings_override.keys() | length > 0
+  when: ravendb_settings_override.keys() | length > 0
   
 - name: Copy RavenDB server certificate file
   become: yes
   ansible.builtin.copy:
-    src: "{{ ravendb_server_certificate_file }}"
+    src: "{{ ravendb_certificate_file }}"
     dest: /etc/ravendb/security/certificate.pfx
     owner: ravendb # server needs to be able to renew the cert in some scenarios 
     group: ravendb
     mode: '0640'
-  when: ravendb_server_certificate_file | default('', true) | length > 0
+  when: ravendb_certificate_file | default('', true) | length > 0
 
 - name: Copy arch specific files
   ansible.builtin.copy:
     remote_src: yes
-    src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_server_arch }}.so"
+    src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_arch }}.so"
     dest: "/usr/lib/ravendb/server/{{ item }}.so"
     owner: root
     group: ravendb
@@ -158,7 +158,7 @@
 
 - name: Remove redundant sos
   become: yes
-  ansible.builtin.shell: find . -maxdepth 1 -type f -name "{{ item }}.*.so" ! -iname "*.{{ ravendb_server_arch }}.so" -exec rm -v {} \;
+  ansible.builtin.shell: find . -maxdepth 1 -type f -name "{{ item }}.*.so" ! -iname "*.{{ ravendb_arch }}.so" -exec rm -v {} \;
   changed_when: true
   loop:
     - librvnpal

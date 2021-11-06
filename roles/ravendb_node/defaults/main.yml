@@ -2,23 +2,22 @@
 # defaults file for ravendb-node
 
 # common variables
-ravendb_server_version: latest
-ravendb_server_version_minor: 5.2
-ravendb_server_release_channel: stable
-ravendb_server_arch: linux.x64
+ravendb_version: latest
+ravendb_version_minor: 5.2
+ravendb_release_channel: stable
+ravendb_arch: linux.x64
 
 # settings options
-ravendb_server_settings_preset: default
-ravendb_server_settings_override: # TODO allow to override by key-value list
+ravendb_settings_preset: default
+ravendb_settings_override: # TODO allow to override by key-value list
 
-# dns related
-ravendb_server_hostname: 
-ravendb_server_node_tag: 
+ravendb_hostname: 
+ravendb_node_tag: 
 
 # secure setup variables
-ravendb_server_certificate_file: 
-ravendb_server_certificate_password: 
-ravendb_server_certificate_letsencrypt_email: 
+ravendb_certificate_file: 
+ravendb_certificate_password: 
+ravendb_certificate_letsencrypt_email: 
 
 # other secure scenarios
-# ravendb_server_certificate_renew_script: None
+# ravendb_certificate_renew_script: None
