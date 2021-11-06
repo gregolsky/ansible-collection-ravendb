@@ -4,16 +4,32 @@
   gather_facts: false
   tasks:
     
+    - name: Load settings.json
+      become: yes
+      slurp:
+        src: "/etc/ravendb/settings.json"
+      register: settings_file
+    
+    - name: Set settings json var
+      set_fact:
+        settings: "{{ settings_file['content'] | b64decode }}"
+   
+    - name: Assert that settings override was applied
+      assert:
+        that: 
+          - settings | json_query('\"Indexing.MapBatchSize\"') == 1024
+          - settings | json_query('\"Logs.Mode\"') == "Information"
+
+    - name: Assert it's unsecured
+      assert:
+        that: settings | json_query('ServerUrl') | regex_search('^http:') | length > 0
+
     - name: Get service status
       become: true
       systemd:
         name: ravendb.service
         state: started
       register: service_status
-
-    - name: Debug service status
-      debug:
-        msg: "{{ service_status.status | json_query('ActiveState') }}"
 
     - name: Assert service state
       ansible.builtin.assert:

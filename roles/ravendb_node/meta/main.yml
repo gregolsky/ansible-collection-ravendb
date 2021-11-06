@@ -33,7 +33,7 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - all
-    - name: Centos
+    - name: RedHat
       versions:
         - all
 

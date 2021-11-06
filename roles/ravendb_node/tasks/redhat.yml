@@ -1,7 +1,10 @@
 - name: Install prerequisites [RedHat]
   ansible.builtin.yum:
-    name: bzip2
+    name: "{{ item }}"
     state: present
+  loop:
+    - bzip2
+    - jq
 
 # TODO install .NET runtime deps
 # https://docs.microsoft.com/pl-pl/dotnet/core/install/linux-centos

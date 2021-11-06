@@ -1,7 +1,11 @@
 - name: Install prerequisites [Debian]
   ansible.builtin.apt:
-    name: bzip2 
+    name: "{{ item }}"
     state: present
+    update_cache: yes
+  loop:
+    - bzip2
+    - jq
 
 # TODO install .NET runtime deps
 # https://docs.microsoft.com/pl-pl/dotnet/core/install/linux-ubuntu

@@ -9,13 +9,16 @@ ravendb_server_arch: linux.x64
 
 # settings options
 ravendb_server_settings_preset: default
-ravendb_server_settings_file: # TODO allow to send user's settings file
-ravendb_server_settings_overrides: # TODO allow to override by key-value list
+ravendb_server_settings_override: # TODO allow to override by key-value list
+
+# dns related
+ravendb_server_hostname: 
+ravendb_server_node_tag: 
 
 # secure setup variables
 ravendb_server_certificate_file: 
-ravendb_server_domain: 
-ravendb_server_node_tag: 
+ravendb_server_certificate_password: 
+ravendb_server_certificate_letsencrypt_email: 
 
 # other secure scenarios
 # ravendb_server_certificate_renew_script: None

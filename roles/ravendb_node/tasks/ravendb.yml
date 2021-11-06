@@ -47,20 +47,22 @@
     groups: ravendb
     append: yes
 
-- name: Prepare directory structure - perms 550
+- name: Prepare directory structure
   become: yes
   file:
     path: "{{ item }}"
     owner: root
     group: ravendb
-    mode: '550' # TODO security, fix permissions to be like in DEB
+    mode: u=rX,g=rX
     state: directory
   loop:
     - "/usr/lib/ravendb/server"
     - "/usr/lib/ravendb/server/libmscordaccore"
     - "/var/lib/ravendb"
+    - "/etc/ravendb"
+    - "/etc/ravendb/security"
 
-- name: Prepare directory structure - perms 770
+- name: Prepare directory structure
   become: yes
   file:
     path: "{{ item }}"
@@ -69,8 +71,6 @@
     mode: '0770' # TODO security, fix permissions to be like in DEB
     state: directory
   loop:
-    - "/etc/ravendb"
-    - "/etc/ravendb/security"
     - "/var/lib/ravendb/nuget"
     - "/var/lib/ravendb/data"
     - "/var/log/ravendb/audit"
@@ -86,16 +86,17 @@
         - --transform
         - s/^RavenDB\/Server//
 
-- name: Prepare directory structure - perms 550
-  become: yes
-  file:
-    path: "{{ item }}"
-    owner: root
-    group: ravendb
-    mode: '550' # TODO security, fix permissions to be like in DEB
-    state: directory
-  loop:
-    - "/usr/lib/ravendb/server"
+# - name: Prepare directory structure
+#   become: yes
+#   file:
+#     path: "{{ item }}"
+#     owner: root
+#     group: ravendb
+#     mode: u=rX,g=rX
+#     state: directory
+#   loop:
+#     - "/usr/lib/ravendb"
+#     - "/usr/lib/ravendb/server"
 
 - name: Template settings.json out 
   become: yes
@@ -106,6 +107,32 @@
     group: ravendb
     mode: '0640'
 
+- name: Settings override to temp file
+  become: yes
+  ansible.builtin.copy:
+    content: "{{ ravendb_server_settings_override | to_json }}"
+    dest: /tmp/ravendb_settings_override.json
+    mode: 0700
+  when: ravendb_server_settings_override.keys() | length > 0
+
+- name: Apply settings overrides
+  become: yes
+  command: >
+    jq -S -s '.[0] + .[1]' "/etc/ravendb/settings.json" "/tmp/ravendb_settings_override.json"
+  when: ravendb_server_settings_override.keys() | length > 0
+  register: overriden_settings
+  # with_items: "{{ ravendb_server_settings_override.keys() | list }}"
+
+- name: Write settings
+  become: yes
+  ansible.builtin.copy:
+    content: "{{ overriden_settings.stdout }}"
+    dest: /etc/ravendb/settings.json
+    owner: root
+    group: ravendb
+    mode: '0640'
+  when: ravendb_server_settings_override.keys() | length > 0
+  
 - name: Copy RavenDB server certificate file
   become: yes
   ansible.builtin.copy:
@@ -171,6 +198,8 @@
 - name: Adjust directories permissions
   file:
     path: /usr/lib/ravendb
+    owner: root
+    group: ravendb
     mode: u=rX,g=rX
     recurse: yes
 

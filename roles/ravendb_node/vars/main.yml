@@ -5,5 +5,4 @@ ravendb_server_http_port: 80
 ravendb_server_https_port: 443
 ravendb_server_tcp_port: 38888
 
-ravendb_server_public_url: None
-ravendb_server_public_url_tcp: None
+ravendb_server_hostname: None
