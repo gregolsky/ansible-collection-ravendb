@@ -5,13 +5,14 @@
 ravendb_version: latest
 ravendb_version_minor: 5.2
 ravendb_release_channel: stable
-ravendb_arch: linux.x64
+ravendb_arch: linux-x64
 
 # settings options
-ravendb_settings_preset: default
+ravendb_settings_preset: default 
 ravendb_settings_override: # TODO allow to override by key-value list
 
-ravendb_hostname: 
+ravendb_license_file: 
+ravendb_hostname:
 ravendb_node_tag: 
 
 # secure setup variables

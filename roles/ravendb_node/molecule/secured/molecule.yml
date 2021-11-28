@@ -3,10 +3,6 @@ dependency:
   name: galaxy
 driver:
   name: docker
-  port_bindings:
-    8080: 80
-    44443: 443
-    38888: 38888
 platforms:
   - name: ubuntu-bionic
     image: jrei/systemd-ubuntu:18.04
@@ -25,7 +21,7 @@ provisioner:
   name: ansible
   log: true
 scenario:
-  name: unsecured
+  name: secured
   idempotent: false
   test_sequence:
     - lint

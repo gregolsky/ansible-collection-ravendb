@@ -1,0 +1,48 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    
+    - name: Get service status
+      become: true
+      systemd:
+        name: ravendb.service
+        state: started
+      register: service_status
+
+    - name: Debug service status
+      debug:
+        msg: "{{ service_status.status | json_query('ActiveState') }}"
+
+    - name: Assert service state
+      ansible.builtin.assert:
+        that: service_status.status | json_query('ActiveState') == 'active'
+      
+    - name: Check if can get RavenDB studio HTML
+      ansible.builtin.uri:
+        url: http://localhost/studio/index.html
+
+    - name: Get databases
+      ansible.builtin.uri:
+        url: http://localhost/databases
+      register: databases
+
+    - name: Set random DB name
+      set_fact:
+        db_name: "db{{ 1000000 | random }}"
+    
+    - name: Create a database
+      ansible.builtin.uri:
+        url: "http://localhost/admin/databases?name={{ db_name }}&replicationFactor=1"
+        method: PUT
+        body_format: json
+        body: |
+          {
+            "DatabaseName": "{{ db_name }}",
+            "Settings": {}, 
+            "Disabled": false,
+            "Encrypted": false,
+            "Topology": { "DynamicNodesDistribution": false } 
+          }
+        status_code: 201

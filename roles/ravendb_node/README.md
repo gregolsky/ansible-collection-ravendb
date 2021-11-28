@@ -17,7 +17,15 @@ ravendb_version: latest
 ravendb_version_minor: 5.2
 ravendb_release_channel: stable
 
-ravendb_settings_preset: local_setup
+ravendb_settings_preset: local_setup (default: None)
+
+# secure setup variables
+ravendb_certificate_file: 
+ravendb_certificate_password: 
+ravendb_certificate_letsencrypt_email: 
+
+# add/override settings
+ravendb_settings_override:
 ```
 
 Dependencies
@@ -30,7 +38,7 @@ Example Playbook
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: ravendb_cluster
+    - hosts: ravendb_cluster_nodes
       roles:
-         - { role: gregolsky.ravendb.ravendb-node, ravendb_version: 5.2.2 }
+         - { role: gregolsky.ravendb.ravendb_node, ravendb_version: 5.2.2 }
 

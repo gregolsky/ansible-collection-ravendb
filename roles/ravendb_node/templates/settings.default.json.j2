@@ -1,31 +1,35 @@
-{% set secured = ravendb_certificate_file is defined and ravendb_certificate_file | length -%}
-{% set has_hostname = ravendb_hostname is defined and ravendb_hostname | length -%}
-{% set has_node_tag = ravendb_node_tag is defined and ravendb_node_tag | length -%}
+{% set secured = ravendb_certificate_file is defined and ravendb_certificate_file and ravendb_certificate_file != "" -%}
+{% set has_hostname = ravendb_hostname is defined and ravendb_hostname and ravendb_hostname != "" -%}
+{% set has_license = ravendb_license_file is defined and ravendb_license_file and ravendb_license_file != "" -%}
+{% set has_certificate_password = ravendb_certificate_password is defined and ravendb_certificate_password and ravendb_certificate_password != "" -%}
+{% set ravendb_port = ravendb_https_port if secured else ravendb_http_port %}
 {% set http_scheme = "https" if secured else "http" -%}
-{% set public_url = (
-    "{{ http_scheme }}://{{ ravendb_hostname }}:{{ ravendb_https_port }}" 
-    if has_node_tag and has_domain
-    else ravendb_public_server_url
-    ) -%}
-{% set public_url_tcp = (
-    "tcp://{{ ravendb_hostname }}"
-    if has_node_tag and has_domain
-    else ravendb_public_server_url_tcp
-    ) -%}
+{% set public_url = "{{ http_scheme }}://{{ ravendb_hostname }}:{{ ravendb_port }}" if has_hostname -%}
+{% set public_url_tcp = "tcp://{{ ravendb_hostname }}:{{ ravendb_tcp_port }}" if has_hostname -%}
 {
     "Setup.Mode": "None",
 
-    "ServerUrl": "{{ http_scheme }}://0.0.0.0:{{ ravendb_https_port }}",
+    "ServerUrl": "{{ http_scheme }}://0.0.0.0:{{ ravendb_port }}",
     "ServerUrl.Tcp": "tcp://0.0.0.0:{{ ravendb_tcp_port }}",
 
+{% if (has_hostname) -%}
     "PublicServerUrl": "{{ public_url }}",
     "PublicServerUrl.Tcp": "{{ public_url_tcp }}",
+{%- endif %}
 
+    "Logs.Mode": "Operations",
     "Logs.RetentionTimeInHrs": 336,
 {% if (secured) -%}
     "Security.Certificate.Path": "/etc/ravendb/security/server.pfx",
+{% if (has_certificate_password) -%}
+    "Security.Certificate.Password": "/etc/ravendb/security/{{ ravendb_certificate_password }}",
+{%- endif %}
 {%- endif %}
     "Security.AuditLog.Compress": true,
     "Security.AuditLog.RetentionTimeInHrs": 52560,
-    "License.Eula.Accepted": true
+
+{% if (has_license) -%}
+    "License.Path": "/etc/ravendb/license.json",
+{%- endif %}
+    "License.Eula.Accepted": true 
 }
