@@ -82,11 +82,8 @@
   register: ravendb_existing_version_result
   when: "'ravendb' in services"  
 
-- name: Debug 'dict object' has no attribute 'stdout'
-  debug: 
-    msg: "{{ ravendb_existing_version_result | to_nice_json }}"
-
-- set_fact:
+- name: Determine whether that's an update or a new deployment
+  set_fact:
     ravendb_should_update_binaries: >
       (ravendb_existing_version_result is not defined) 
       or (not ravendb_existing_version_result.skipped 
@@ -132,14 +129,6 @@
   when: ravendb_settings_override.keys() | length > 0
   tags: ravendb_settings
 
-- name: Copy settings file
-  become: yes
-  ansible.builtin.copy:
-    remote_src: "/tmp/ravendb_settings.json"
-    dest: /etc/ravendb/settings/json.json
-  when: ravendb_settings_override.keys() | length == 0
-  tags: ravendb_settings
-
 - name: Adjust permissions for settings file
   become: yes
   ansible.builtin.file:
@@ -147,6 +136,18 @@
     owner: root
     group: ravendb
     mode: '0640'
+  when: ravendb_settings_override.keys() | length > 0
+  tags: ravendb_settings
+
+- name: Copy settings file
+  become: yes
+  ansible.builtin.copy:
+    remote_src: "/tmp/ravendb_settings.json"
+    dest: /etc/ravendb/settings.json
+    owner: root
+    group: ravendb
+    mode: '0640'
+  when: ravendb_settings_override.keys() | length == 0
   tags: ravendb_settings
 
 - name: Copy license file
