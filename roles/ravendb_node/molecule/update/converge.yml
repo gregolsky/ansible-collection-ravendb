@@ -1,13 +1,58 @@
 ---
-- name: TODO
+- name: Update
   hosts: all
   tasks:
-    - name: "Include ravendb_node"
+    - name: "Install 4.2"
+      tags: node_init
+      include_role:
+        name: "ravendb_node"
+      vars:
+        ravendb_version: "4.2.118"
+        ravendb_settings_override:
+          Security.UnsecuredAccessAllowed: "PublicNetwork"
+          Indexing.MapBatchSize: 1024
+          Logs.Mode: "Information"
+
+    - name: Wait for port 8080 to become open
+      tags: node_wait_for
+      wait_for:
+        port: 8080
+        sleep: 1
+        delay: 2
+        timeout: 60
+
+    - name: Ensure alive
+      retries: 10
+      delay: 2
+      tags: node_ensure_alive
+      ansible.builtin.uri:
+        url: "http://localhost:8080/setup/alive"
+        method: GET
+        status_code: 204
+
+    - name: Create a database
+      tags: node_create_db
+      ansible.builtin.uri:
+        url: "http://localhost:8080/admin/databases?name=database&replicationFactor=1"
+        method: PUT
+        body_format: json
+        body: |
+          {
+            "DatabaseName": "database",
+            "Settings": {}, 
+            "Disabled": false,
+            "Encrypted": false,
+            "Topology": { "DynamicNodesDistribution": false } 
+          }
+        status_code: 201
+
+    - name: "Update to 5.2"
+      tags: node_update
       include_role:
         name: "ravendb_node"
       vars:
         ravendb_version: "5.2.4"
         ravendb_settings_override:
           Security.UnsecuredAccessAllowed: "PublicNetwork"
-          Indexing.MapBatchSize: 1024
+          Indexing.MapBatchSize: 2048
           Logs.Mode: "Information"

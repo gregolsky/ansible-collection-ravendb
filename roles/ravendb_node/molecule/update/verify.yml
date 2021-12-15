@@ -4,6 +4,28 @@
   gather_facts: false
   tasks:
     
+    - name: Wait for port 8080 to become open
+      tags: node_wait_for
+      wait_for:
+        port: 8080
+        sleep: 1
+        delay: 2
+        timeout: 60
+
+    - name: Get RavenDB version
+      become: yes
+      command: >
+        /usr/lib/ravendb/server/Raven.Server --version
+      register: ravendb_version_result
+      changed_when: false
+
+    - name: Make sure it's updated
+      assert:
+        that:
+          - ravendb_version_result.stdout == '5.2.4'
+        fail_msg: "Server version output: {{ ravendb_version_result.stdout }}"
+
+
     - name: Load settings.json
       become: yes
       slurp:
@@ -17,7 +39,7 @@
     - name: Assert that settings override was applied
       assert:
         that: 
-          - settings | json_query('\"Indexing.MapBatchSize\"') == 1024
+          - settings | json_query('\"Indexing.MapBatchSize\"') == 2048
           - settings | json_query('\"Logs.Mode\"') == "Information"
 
     - name: Assert it's unsecured
@@ -31,34 +53,16 @@
         state: started
       register: service_status
 
-    - name: Assert service state
-      ansible.builtin.assert:
-        that: service_status.status | json_query('ActiveState') == 'active'
-      
-    - name: Check if can get RavenDB studio HTML
+    - name: Ensure alive
+      retries: 10
+      delay: 2
+      tags: node_ensure_alive
       ansible.builtin.uri:
-        url: http://localhost/studio/index.html
+        url: "http://localhost:8080/setup/alive"
+        method: GET
+        status_code: 204
 
     - name: Get databases
       ansible.builtin.uri:
-        url: http://localhost/databases
+        url: http://localhost:8080/databases
       register: databases
-
-    - name: Set random DB name
-      set_fact:
-        db_name: "db{{ 1000000 | random }}"
-    
-    - name: Create a database
-      ansible.builtin.uri:
-        url: "http://localhost/admin/databases?name={{ db_name }}&replicationFactor=1"
-        method: PUT
-        body_format: json
-        body: |
-          {
-            "DatabaseName": "{{ db_name }}",
-            "Settings": {}, 
-            "Disabled": false,
-            "Encrypted": false,
-            "Topology": { "DynamicNodesDistribution": false } 
-          }
-        status_code: 201

@@ -1,4 +1,4 @@
-name: ravendb_node role - unsecured setup test
+name: ravendb_node role tests 
 
 on:
   push:
@@ -36,4 +36,9 @@ jobs:
         run: |
           cd roles/ravendb_node
           molecule test -s unsecured
+
+      - name: Run molecule update scenario
+        run: |
+          cd roles/ravendb_node
+          molecule test -s update
 

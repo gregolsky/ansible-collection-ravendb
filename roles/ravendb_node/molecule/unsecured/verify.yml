@@ -37,11 +37,11 @@
       
     - name: Check if can get RavenDB studio HTML
       ansible.builtin.uri:
-        url: http://localhost/studio/index.html
+        url: http://localhost:8080/studio/index.html
 
     - name: Get databases
       ansible.builtin.uri:
-        url: http://localhost/databases
+        url: http://localhost:8080/databases
       register: databases
 
     - name: Set random DB name
@@ -50,7 +50,7 @@
     
     - name: Create a database
       ansible.builtin.uri:
-        url: "http://localhost/admin/databases?name={{ db_name }}&replicationFactor=1"
+        url: "http://localhost:8080/admin/databases?name={{ db_name }}&replicationFactor=1"
         method: PUT
         body_format: json
         body: |
