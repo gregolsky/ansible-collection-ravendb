@@ -29,3 +29,7 @@ Here is an example directory of the majority of plugins currently supported by A
 ```
 
 A full list of plugin types can be found at [Working With Plugins](https://docs.ansible.com/ansible/2.11/plugins/plugins.html).
+
+# Plugin ideas
+
+- document lookup plugin
