@@ -8,18 +8,18 @@ ravendb_release_channel: stable
 ravendb_arch: linux-x64
 
 # settings options
-ravendb_settings_preset: default 
-ravendb_settings_override: 
-  Logs.Mode: "Information"
+#ravendb_settings_preset: default 
+#ravendb_settings_override: 
+#  Logs.Mode: "Information"
 
-ravendb_license_file: "license.json"
-ravendb_hostname:
-ravendb_node_tag: 
+#ravendb_license_file: "license.json"
+#ravendb_hostname:
+#ravendb_node_tag: 
 
 # secure setup variables
-ravendb_certificate_file: "server.pfx"
-ravendb_certificate_password: "raven"
-ravendb_certificate_letsencrypt_email: 
+#ravendb_certificate_file: "server.pfx"
+#ravendb_certificate_password: "raven"
+#ravendb_certificate_letsencrypt_email: 
 
 # other secure scenarios
 # ravendb_certificate_renew_script: None
