@@ -1,17 +1,19 @@
 ---
-- name: Update
+- name: Cleanup
   hosts: all
   tasks:
-    - name: "Install 5.4"
-      tags: node_init
+    - name: "Include ravendb_node"
       include_role:
-        name: "ravendb_node"
+        name: ravendb_node
       vars:
-        ravendb_version_minor: "5.4"
+        ravendb_version: latest
+        ravendb_version_minor: 6.2
+        ravendb_release_channel: stable
+        ravendb_arch: linux-x64
+        ravendb_settings_preset: default
         ravendb_settings_override:
-          Security.UnsecuredAccessAllowed: "PublicNetwork"
-          Indexing.MapBatchSize: 1024
           Logs.Mode: "Information"
+          Security.UnsecuredAccessAllowed: "PublicNetwork"
 
     - name: Wait for port 8080 to become open
       tags: node_wait_for
@@ -46,13 +48,7 @@
           }
         status_code: 201
 
-    - name: "Update to 6.2"
-      tags: node_update
+    - name: Uninstall RavenDB
       include_role:
-        name: "ravendb_node"
-      vars:
-        ravendb_version_minor: "6.2"
-        ravendb_settings_override:
-          Security.UnsecuredAccessAllowed: "PublicNetwork"
-          Indexing.MapBatchSize: 2048
-          Logs.Mode: "Information"
+        name: ravendb_node
+        tasks_from: ravendb_uninstall.yml

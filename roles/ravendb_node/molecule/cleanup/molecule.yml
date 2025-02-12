@@ -24,7 +24,7 @@ provisioner:
   name: ansible
   log: true
 scenario:
-  name: unsecured
+  name: cleanup
   test_sequence:
     - destroy
     - create

@@ -1,0 +1,67 @@
+---
+- name: Ensure Python3 is installed
+  become: true
+  ansible.builtin.package:
+    name: python3
+    state: present
+
+- name: Ensure pip for Python3 is installed
+  become: true
+  ansible.builtin.package:
+    name: python3-pip
+    state: present
+
+- name: Ensure python3-venv is installed
+  become: true
+  ansible.builtin.package:
+    name: python3-venv
+    state: present
+
+- name: Check if Python binary exists in virtual environment
+  stat:
+    path: /opt/ravendb_venv/bin/python
+  register: venv_integrity
+
+- name: Recreate virtual environment if it is incomplete
+  become: true
+  ansible.builtin.command:
+    cmd: rm -rf /opt/ravendb_venv
+  when: not venv_integrity.stat.exists
+
+- name: Create a virtual environment for Python
+  become: true
+  ansible.builtin.command:
+    cmd: python3 -m venv /opt/ravendb_venv
+    creates: /opt/ravendb_venv/bin/python
+
+- name: Set Python interpreter to use virtual environment
+  set_fact:
+    ansible_python_interpreter: /opt/ravendb_venv/bin/python
+
+- name: Install pip explicitly after ensurepip
+  become: true
+  ansible.builtin.command:
+    cmd: /opt/ravendb_venv/bin/python -m ensurepip --default-pip
+
+- name: Upgrade pip in the virtual environment
+  become: true
+  ansible.builtin.command:
+    cmd: /opt/ravendb_venv/bin/python -m pip install --upgrade pip
+
+- name: Check Python version and pip location in virtual environment
+  become: true
+  ansible.builtin.command:
+    cmd: /opt/ravendb_venv/bin/python -m pip --version
+  changed_when: false
+
+- name: Check if RavenDB client is installed in virtual environment
+  command: /opt/ravendb_venv/bin/pip show ravendb
+  register: ravendb_installed
+  failed_when: ravendb_installed.rc != 0 and ravendb_installed.rc != 1
+  changed_when: false
+
+- name: Install RavenDB Python client in virtual environment
+  become: true
+  ansible.builtin.command:
+    cmd: /opt/ravendb_venv/bin/pip install ravendb
+  when: ravendb_installed.rc == 1

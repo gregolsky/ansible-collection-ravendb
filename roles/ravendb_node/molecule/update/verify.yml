@@ -22,7 +22,7 @@
     - name: Make sure it's updated
       assert:
         that:
-          - ravendb_version_result.stdout == '5.2.4'
+          - ravendb_version_result.stdout.startswith('6.2')
         fail_msg: "Server version output: {{ ravendb_version_result.stdout }}"
 
 

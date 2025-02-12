@@ -1,0 +1,39 @@
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore Molecule temporary files
+.molecule/
+molecule/.molecule/
+
+# Ignore sensitive files
+*.vault
+secrets.yml
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore backup files
+*.bak
+*.swp
+*.swo
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+
+# Ignore Travis CI configuration
+.travis.yml
+
+# Ignore Ansible Galaxy metadata files
+galaxy.yml
+
+# Ignore unit test cache
+tests/unit/__pycache__/

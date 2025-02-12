@@ -1,0 +1,33 @@
+---
+- name: Create Database
+  hosts: ravendb_nodes
+  gather_facts: no
+
+  tasks:
+    - name: Include Python prerequisites
+      include_role:
+        name: ravendb_node
+        tasks_from: ravendb_python_prerequisites.yml
+
+    - name: Ensure RavenDB database is present (check mode)
+      ravendb.community.database:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        replication_factor: 3
+        state: present
+      check_mode: yes
+
+    - name: Ensure RavenDB database is present
+      ravendb.community.database:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        replication_factor: 3
+        state: present
+
+    - name: Ensure RavenDB database is present (idempotency check)
+      ravendb.community.database:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        replication_factor: 3
+        state: present
+

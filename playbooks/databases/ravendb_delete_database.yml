@@ -1,0 +1,31 @@
+---
+- name: Delete Database
+  hosts: ravendb_nodes
+  gather_facts: no
+
+  tasks:
+    - name: Include Python prerequisites
+      include_role:
+        name: ravendb_node
+        tasks_from: ravendb_python_prerequisites.yml
+
+    - name: Ensure RavenDB database is absent (check mode)
+      ravendb.community.database:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        state: absent
+      check_mode: yes
+
+    - name: Ensure RavenDB database is absent
+      ravendb.community.database:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        state: absent
+
+    - name: Ensure RavenDB database is absent (idempotency check)
+      ravendb.community.database:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        state: absent
+
+

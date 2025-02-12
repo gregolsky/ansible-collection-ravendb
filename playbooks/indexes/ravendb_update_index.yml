@@ -1,0 +1,80 @@
+---
+- name: Update Index
+  hosts: ravendb_nodes
+  gather_facts: no
+
+  tasks:
+    - name: Include Python prerequisites
+      include_role:
+        name: ravendb_node
+        tasks_from: ravendb_python_prerequisites.yml
+
+    - name: Ensure RavenDB Index is present
+      ravendb.community.index:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        index_name: "UsersByName"
+        index_definition: 
+          map: 
+            - "from c in docs.Users select new { c.name, count = 1 }"
+        state: present
+
+    - name: Update RavenDB Index definiton (check mode)
+      ravendb.community.index:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        index_name: "UsersByName"
+        index_definition: 
+          map: 
+            - "from c in docs.Users select new { c.name, count = 13 }"
+          reduce: >
+            from result in results
+            group result by result.name 
+            into g 
+            select new 
+            { 
+              name = g.Key, 
+              count = g.Sum(x => x.count) 
+            }
+        state: present
+      check_mode: yes
+
+
+    - name: Update RavenDB Index definiton
+      ravendb.community.index:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        index_name: "UsersByName"
+        index_definition: 
+          map: 
+            - "from c in docs.Users select new { c.name, count = 13 }"
+          reduce: >
+            from result in results
+            group result by result.name 
+            into g 
+            select new 
+            { 
+              name = g.Key, 
+              count = g.Sum(x => x.count) 
+            }
+        state: present
+
+
+    - name: Update RavenDB Index definiton (idempotency check)
+      ravendb.community.index:
+        url: "http://{{ ansible_host }}:8080"
+        database_name: "my_database"
+        index_name: "UsersByName"
+        index_definition: 
+          map: 
+            - "from c in docs.Users select new { c.name, count = 13 }"
+          reduce: >
+            from result in results
+            group result by result.name 
+            into g 
+            select new 
+            { 
+              name = g.Key, 
+              count = g.Sum(x => x.count) 
+            }
+        state: present
