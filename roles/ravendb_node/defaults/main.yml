@@ -3,21 +3,22 @@
 
 # common variables
 ravendb_version: latest
-ravendb_version_minor: 5.2
+ravendb_version_minor: 6.2
 ravendb_release_channel: stable
 ravendb_arch: linux-x64
 
 # settings options
 ravendb_settings_preset: default 
-ravendb_settings_override: # TODO allow to override by key-value list
+ravendb_settings_override: 
+  Logs.Mode: "Information"
 
-ravendb_license_file: 
+ravendb_license_file: "license.json"
 ravendb_hostname:
 ravendb_node_tag: 
 
 # secure setup variables
-ravendb_certificate_file: 
-ravendb_certificate_password: 
+ravendb_certificate_file: "server.pfx"
+ravendb_certificate_password: "raven"
 ravendb_certificate_letsencrypt_email: 
 
 # other secure scenarios

@@ -1,0 +1,61 @@
+- name: Message
+  debug:
+    msg: "Uninstalling RavenDB..."
+  
+- name: Remove RavenDB Installation
+  block:
+    - name: Populate service facts
+      service_facts:
+
+    - name: Stop RavenDB service
+      become: true
+      ansible.builtin.systemd:
+        name: ravendb
+        state: stopped
+      when: "'ravendb.service' in services"  
+      ignore_errors: true
+
+    - name: Disable RavenDB service
+      become: true
+      ansible.builtin.systemd:
+        name: ravendb
+        enabled: no
+      when: "'ravendb.service' in services"  
+      ignore_errors: true
+
+    - name: Reset failed systemd services
+      become: true
+      ansible.builtin.command: systemctl reset-failed
+
+    - name: Remove RavenDB service file
+      become: true
+      ansible.builtin.file:
+        path: /etc/systemd/system/ravendb.service
+        state: absent
+
+    - name: Remove RavenDB binaries and directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/usr/lib/ravendb"
+        - "/var/lib/ravendb"
+        - "/etc/ravendb"
+        - "/var/log/ravendb"
+        - "/tmp/ravendb.tar.bz2"
+      
+    - name: Remove RavenDB user
+      become: true
+      ansible.builtin.user:
+        name: ravendb
+        state: absent
+        remove: yes 
+
+    - name: Remove RavenDB group
+      become: true
+      ansible.builtin.group:
+        name: ravendb
+        state: absent
+
+

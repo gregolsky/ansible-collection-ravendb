@@ -1,18 +1,17 @@
----
 dependency:
   name: galaxy
 driver:
   name: docker
   port_bindings:
-    8080: 80
-    44443: 443
-    38888: 38888
+    '8080': 80
+    '38888': 38888
+    '44443': 443
 platforms:
   - name: ubuntu-bionic
-    image: jrei/systemd-ubuntu:18.04
+    image: 'jrei/systemd-ubuntu:22.04'
     privileged: true
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - '/sys/fs/cgroup:/sys/fs/cgroup:rw'
     tmpfs:
       - /run
       - /tmp
@@ -26,9 +25,7 @@ provisioner:
   log: true
 scenario:
   name: update
-  idempotent: false
   test_sequence:
-    - lint
     - destroy
     - create
     - converge

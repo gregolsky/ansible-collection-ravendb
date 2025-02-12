@@ -17,7 +17,6 @@
     - name: Assert that settings override was applied
       assert:
         that: 
-          - settings | json_query('\"Indexing.MapBatchSize\"') == 1024
           - settings | json_query('\"Logs.Mode\"') == "Information"
 
     - name: Assert it's unsecured

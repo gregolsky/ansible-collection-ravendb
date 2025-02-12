@@ -1,7 +1,7 @@
 - name: Message
   debug:
     msg: "Installing RavenDB {{ ravendb_version }}..."
-
+       
 - block:
   - name: Determine download url for latest version
     set_fact:
@@ -24,21 +24,21 @@
         dest: /tmp/ravendb.tar.bz2
   tags: download
 
+- block: 
+  - name: Populate service facts
+    service_facts:
 
-- name: Populate service facts
-  service_facts:
-  tags: service_mgmt
-
-- name: Stop RavenDB service
-  become: true
-  service:
-    name: ravendb
-    enabled: yes
-    state: stopped
-  when: "'ravendb.service' in services"  
+  - name: Stop RavenDB service
+    become: true
+    service:
+      name: ravendb
+      enabled: yes
+      state: stopped
+    when: "'ravendb.service' in services"  
   tags: service_mgmt
   
 - name: Set vm.swappiness
+  become: true
   sysctl:
     name: vm.swappiness
     value: '5'
@@ -46,25 +46,25 @@
   when: molecule is not defined
   tags: config
 
-- name: Create ravendb group
-  become: yes
-  ansible.builtin.group:
-    name: ravendb
-    state: present
-  tags: user,service_mgmt
+- block:
+  - name: Create ravendb group
+    become: true
+    ansible.builtin.group:
+      name: ravendb
+      state: present
 
-- name: Create ravendb user
-  become: yes
-  ansible.builtin.user:
-    name: ravendb
-    state: present
-    comment: RavenDB Server user
-    groups: ravendb
-    append: yes
+  - name: Create ravendb user
+    become: true
+    ansible.builtin.user:
+      name: ravendb
+      state: present
+      comment: RavenDB Server user
+      groups: ravendb 
+      append: yes
   tags: user,service_mgmt
 
 - name: Prepare directory structure
-  become: yes
+  become: true
   file:
     path: "{{ item }}"
     owner: root
@@ -79,21 +79,22 @@
     - "/etc/ravendb/security"
 
 - name: Prepare directory structure
-  become: yes
+  become: true
   file:
     path: "{{ item }}"
     owner: ravendb
     group: ravendb
-    mode: '0770' # TODO security, fix permissions to be like in DEB
+    mode: '0770'
     state: directory
   loop:
+    - "/var/lib/ravendb"
     - "/var/lib/ravendb/nuget"
     - "/var/lib/ravendb/data"
     - "/var/log/ravendb/audit"
     - "/var/log/ravendb/logs"
 
 - name: Determine current RavenDB version
-  become: yes
+  become: true
   command: >
     /usr/lib/ravendb/server/Raven.Server --version
   register: ravendb_existing_version_result
@@ -109,7 +110,7 @@
   tags: binaries
 
 - name: Unpack RavenDB server binaries
-  become: yes
+  become: true
   ansible.builtin.unarchive:
     remote_src: yes
     src: /tmp/ravendb.tar.bz2
@@ -120,82 +121,81 @@
   when: ravendb_should_update_binaries
   tags: binaries
 
-- block:
+- name: Determine settings.json template
+  set_fact:
+    ravendb_settings_json_j2: "settings.{{ ravendb_settings_preset }}.json.j2" 
 
-  - name: Determine settings.json template
-    set_fact:
-      ravendb_settings_json_j2: "settings.{{ ravendb_settings_preset }}.json.j2" 
+- name: Template settings.json preset out 
+  become: true
+  ansible.builtin.template:
+    src: "{{ ravendb_settings_json_j2 }}"
+    dest: /tmp/ravendb_settings.json
+    mode: 0700
 
-  - name: Template settings.json preset out 
-    become: yes
-    ansible.builtin.template:
-      src: "{{ ravendb_settings_json_j2 }}"
-      dest: /tmp/ravendb_settings.json
-      mode: 0700
+- name: Settings override to temp file
+  become: true
+  ansible.builtin.copy:
+    content: "{{ ravendb_settings_override | to_json }}"
+    dest: /tmp/ravendb_settings_override.json
+    mode: 0700
+  when: ravendb_settings_override is not none and ravendb_settings_override | length > 0
 
-  - name: Settings override to temp file
-    become: yes
-    ansible.builtin.copy:
-      content: "{{ ravendb_settings_override | to_json }}"
-      dest: /tmp/ravendb_settings_override.json
-      mode: 0700
-    when: ravendb_settings_override.keys() | length > 0
+- name: Apply settings overrides
+  become: true
+  command: >
+    bash -c "jq -S -s '.[0] + .[1]' /tmp/ravendb_settings.json /tmp/ravendb_settings_override.json > /etc/ravendb/settings.json"
+  when: ravendb_settings_override is not none and ravendb_settings_override | length > 0
 
-  - name: Apply settings overrides
-    become: yes
-    command: >
-      bash -c "jq -S -s '.[0] + .[1]' /tmp/ravendb_settings.json /tmp/ravendb_settings_override.json > /etc/ravendb/settings.json"
-    when: ravendb_settings_override.keys() | length > 0
+- name: Adjust permissions for settings file
+  become: true
+  ansible.builtin.file:
+    dest: /etc/ravendb/settings.json
+    owner: root
+    group: ravendb
+    mode: '0640'
+  when: ravendb_settings_override is not none and ravendb_settings_override | length > 0
 
-  - name: Adjust permissions for settings file
-    become: yes
-    ansible.builtin.file:
-      dest: /etc/ravendb/settings.json
-      owner: root
-      group: ravendb
-      mode: '0640'
-    when: ravendb_settings_override.keys() | length > 0
+- name: Copy license file
+  become: true
+  ansible.builtin.copy:
+    src: "{{ ravendb_license_file }}"
+    dest: /etc/ravendb/license.json
+    owner: root 
+    group: ravendb
+    mode: '0640'
+  when: ravendb_license_file | default('', true) | length > 0
 
-  - name: Copy settings file
-    become: yes
-    ansible.builtin.copy:
-      remote_src: "/tmp/ravendb_settings.json"
-      dest: /etc/ravendb/settings.json
-      owner: root
-      group: ravendb
-      mode: '0640'
-    when: ravendb_settings_override.keys() | length == 0
+- name: Include secure setup tasks
+  ansible.builtin.include_tasks: ravendb_secure_setup.yml
+  when: ravendb_secured_enabled | default(false)
 
-  - name: Copy license file
-    become: yes
-    ansible.builtin.copy:
-      src: "{{ ravendb_license_file }}"
-      dest: /etc/ravendb/license.json
-      owner: root 
-      group: ravendb
-      mode: '0640'
-    when: ravendb_license_file | default('', true) | length > 0
+- name: Include self-signed setup tasks
+  ansible.builtin.include_tasks: ravendb_secure_self_sign_setup.yml
+  when: ravendb_secured_self_signed_enabled | default(false)
 
-  - name: Copy RavenDB server certificate file
-    become: yes
-    ansible.builtin.copy:
-      src: "{{ ravendb_certificate_file }}"
-      dest: /etc/ravendb/security/certificate.pfx
-      owner: ravendb # server needs to be able to renew the cert in some scenarios 
-      group: ravendb
-      mode: '0640'
-    when: ravendb_certificate_file | default('', true) | length > 0
+- name: Copy settings file
+  become: true
+  ansible.builtin.copy:
+    remote_src: "/tmp/ravendb_settings.json"
+    dest: /etc/ravendb/settings.json
+    owner: root
+    group: ravendb
+    mode: '0640'
+  when: 
+    - ravendb_settings_override is not none
+    - ravendb_settings_override | length == 0
+    - not (ravendb_secured_enabled | default(false))
 
-  - name: Clear default settings json
-    ansible.builtin.copy:
-      content: '{}'
-      dest: "/usr/lib/ravendb/server/settings.default.json"
-      force: yes
-      owner: root
-      group: ravendb
-      mode: '0644'
-    when: ravendb_should_update_binaries
-
+- name: Clear default settings json
+  become: true
+  ansible.builtin.copy:
+    content: '{}'
+    dest: "/usr/lib/ravendb/server/settings.default.json"
+    force: yes
+    owner: root
+    group: ravendb
+    mode: '0644'
+  when: ravendb_should_update_binaries
   tags: config,ravendb_settings
 
 - name: Set ravendb_arch_so
@@ -221,7 +221,7 @@
   tags: binaries
 
 - name: Remove redundant sos
-  become: yes
+  become: true
   ansible.builtin.shell: find . -maxdepth 1 -type f -name "{{ item }}.*.so" ! -iname "*.{{ ravendb_arch_so }}.so" -exec rm -v {} \;
   changed_when: true
   loop:
@@ -232,7 +232,7 @@
   tags: binaries
 
 - name: Adjust binaries permissions
-  become: yes
+  become: true
   ansible.builtin.file:
     dest: /usr/lib/ravendb/server
     owner: root
@@ -242,24 +242,36 @@
   tags: binaries
 
 - name: Adjust executables permissions
+  become: true
   ansible.builtin.file:
     name: "{{ item }}"
     owner: root
     group: ravendb
     mode: u=rx,g=rx
   loop:
-    - "usr/lib/ravendb/server/Raven.Server"
-    - "usr/lib/ravendb/server/rvn"
-    - "usr/lib/ravendb/server/Raven.Debug"
-    - "usr/lib/ravendb/server/createdump"
+    - "/usr/lib/ravendb/server/Raven.Server"
+    - "/usr/lib/ravendb/server/rvn"
+    - "/usr/lib/ravendb/server/Raven.Debug"
+    - "/usr/lib/ravendb/server"
+    - "/usr/lib/ravendb/server/createdump"
   tags: binaries
 
 - name: Adjust directories permissions
+  become: true
   file:
     path: /usr/lib/ravendb
     owner: root
     group: ravendb
     mode: u=rX,g=rX
+    recurse: yes
+
+- name: Adjust ownership and permissions for RavenDB server directory
+  become: true
+  ansible.builtin.file:
+    path: /usr/lib/ravendb/server
+    owner: ravendb
+    group: ravendb
+    mode: '0755'
     recurse: yes
 
 - name: Check OS uses capabilities 
@@ -269,6 +281,7 @@
   tags: binaries
 
 - name: Set capabilities
+  become: true
   community.general.capabilities:
     path: /usr/lib/ravendb/server/Raven.Server 
     capability: CAP_NET_BIND_SERVICE=+eip 
@@ -277,7 +290,7 @@
   tags: binaries
 
 - name: Template ravendb.service out 
-  become: yes
+  become: true
   ansible.builtin.template:
     src: ravendb.service.j2
     dest: /etc/systemd/system/ravendb.service

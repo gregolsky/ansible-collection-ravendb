@@ -1,0 +1,13 @@
+---
+- hosts: ravendb_nodes
+  remote_user: root
+  roles:
+    - role: "ravendb_node"
+      vars:
+        ravendb_version_minor: 5.4
+        ravendb_secured_enabled: true
+        ravendb_settings_preset: default
+        ravendb_license_file: "license.json"
+        ravendb_admin_email: "omer@ravendb.net"
+        ravendb_domain: "my-test-domain"
+        ravendb_root_domain: "development.run"
