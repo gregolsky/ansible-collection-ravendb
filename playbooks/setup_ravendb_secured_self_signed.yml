@@ -4,6 +4,7 @@
   roles:
     - role: "ravendb_node"
       vars:
+        ravendb_state: present
         ravendb_secured_self_signed_enabled: true
         ravendb_settings_preset: default
         ravendb_settings_override:

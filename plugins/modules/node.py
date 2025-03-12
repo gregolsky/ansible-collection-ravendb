@@ -1,7 +1,15 @@
 from ansible.module_utils.basic import AnsibleModule
 import requests
+from urllib.parse import urlparse
 
+def is_valid_url(url):
+    if not isinstance(url, str):
+        return False
+    parsed = urlparse(url)
+    return all([parsed.scheme in ["http", "https"], parsed.netloc])
 
+def is_valid_tag(tag):
+    return isinstance(tag, str) and tag.isalnum() and tag.isupper()
 
 def add_node(node,check_mode):
 
@@ -12,11 +20,14 @@ def add_node(node,check_mode):
 
     if not leader_url:
         return {"changed": False, "msg": "Leader URL must be specified"}
-
-    if not isinstance(tag, str) or not tag.isalnum() or tag != tag.upper():
+    
+    if not is_valid_url(leader_url):
+        return {"changed": False, "msg": f"Invalid Leader URL: {leader_url}"}
+    
+    if not is_valid_tag(tag):
         return {"changed": False, "msg": "Invalid tag: Node tag must be an uppercase non-empty alphanumeric string"}
 
-    if not isinstance(url, str) or not url.startswith("http"):
+    if not is_valid_url(url):
         return {"changed": False, "msg": "Invalid URL: must be a valid HTTP(S) URL"}
     
     headers = {"Content-Type": "application/json"}

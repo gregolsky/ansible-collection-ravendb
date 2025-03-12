@@ -1,29 +1,3 @@
-- name: Message
-  debug:
-    msg: "Installing RavenDB {{ ravendb_version }}..."
-       
-- block:
-  - name: Determine download url for latest version
-    set_fact:
-      ravendb_download_url: "https://hibernatingrhinos.com/downloads/RavenDB%20for%20Linux%20x64/latest?buildType={{ ravendb_release_channel }}&version={{ ravendb_version_minor }}"
-    when: ravendb_version == "latest"
-
-  - name: Determine download url for exact version
-    set_fact:
-      ravendb_download_url: "https://daily-builds.s3.amazonaws.com/RavenDB-{{ ravendb_version }}-{{ ravendb_arch }}.tar.bz2"
-    when: ravendb_version != "latest"
-
-  - name: Remove RavenDB previous download
-    ansible.builtin.file:
-      path: /tmp/ravendb.tar.bz2
-      state: absent
-
-  - name: Download RavenDB server binaries
-    ansible.builtin.get_url:
-        url: "{{ ravendb_download_url }}"
-        dest: /tmp/ravendb.tar.bz2
-  tags: download
-
 - block: 
   - name: Populate service facts
     service_facts:
@@ -93,33 +67,54 @@
     - "/var/log/ravendb/audit"
     - "/var/log/ravendb/logs"
 
-- name: Determine current RavenDB version
-  become: true
-  command: >
-    /usr/lib/ravendb/server/Raven.Server --version
-  register: ravendb_existing_version_result
-  when: "'ravendb.service' in services"  
-  tags: binaries
+- name: Message
+  debug:
+    msg: "Installing RavenDB {{ ravendb_version }}..."
 
-- name: Determine whether that's an update or a new deployment
+- name: Determine whether to update or install RavenDB
   set_fact:
-    ravendb_should_update_binaries: >
-      (ravendb_existing_version_result is not defined) 
-      or (not ravendb_existing_version_result.skipped 
-          and ravendb_existing_version_result.stdout != ravendb_version) 
-  tags: binaries
+    ravendb_should_update_binaries: "{{ ravendb_installed_version.stdout is not defined or ravendb_installed_version.stdout != ravendb_version }}"
 
-- name: Unpack RavenDB server binaries
+- name: Check if RavenDB is already installed
+  stat:
+    path: /usr/lib/ravendb/server/Raven.Server
+  register: ravendb_binary
+ 
+- name: Install or Upgrade RavenDB from DEB package
   become: true
-  ansible.builtin.unarchive:
-    remote_src: yes
-    src: /tmp/ravendb.tar.bz2
-    dest: /usr/lib/ravendb/server
-    extra_opts:
-        - --transform
-        - s/^RavenDB\/Server//
-  when: ravendb_should_update_binaries
-  tags: binaries
+  ansible.builtin.apt:
+    deb: /tmp/ravendb.deb
+  when: ravendb_should_update_binaries and ansible_facts['os_family'] | lower == 'debian'
+
+- block:
+  - name: Determine current RavenDB version
+    become: true
+    command: >
+      /usr/lib/ravendb/server/Raven.Server --version
+    register: ravendb_existing_version_result
+    when: "'ravendb.service' in services"  
+    tags: binaries
+
+  - name: Determine whether that's an update or a new deployment
+    set_fact:
+      ravendb_should_update_binaries: >
+        (ravendb_existing_version_result is not defined) 
+        or (not ravendb_existing_version_result.skipped 
+            and ravendb_existing_version_result.stdout != ravendb_version) 
+    tags: binaries
+
+  - name: Unpack RavenDB server binaries
+    become: true
+    ansible.builtin.unarchive:
+      remote_src: yes
+      src: /tmp/ravendb.tar.bz2
+      dest: /usr/lib/ravendb/server
+      extra_opts:
+          - --transform
+          - s/^RavenDB\/Server//
+    when: ravendb_should_update_binaries
+    tags: binaries
+  when: ansible_facts['os_family'] | lower == 'redhat'
 
 - name: Determine settings.json template
   set_fact:
@@ -138,13 +133,13 @@
     content: "{{ ravendb_settings_override | to_json }}"
     dest: /tmp/ravendb_settings_override.json
     mode: 0700
-  when: ravendb_settings_override is not none and ravendb_settings_override | length > 0
+  when: ravendb_settings_override.keys() | length > 0
 
 - name: Apply settings overrides
   become: true
   command: >
     bash -c "jq -S -s '.[0] + .[1]' /tmp/ravendb_settings.json /tmp/ravendb_settings_override.json > /etc/ravendb/settings.json"
-  when: ravendb_settings_override is not none and ravendb_settings_override | length > 0
+  when: ravendb_settings_override.keys() | length > 0
 
 - name: Adjust permissions for settings file
   become: true
@@ -153,7 +148,7 @@
     owner: root
     group: ravendb
     mode: '0640'
-  when: ravendb_settings_override is not none and ravendb_settings_override | length > 0
+  when: ravendb_settings_override.keys() | length > 0
 
 - name: Copy license file
   become: true
@@ -176,14 +171,15 @@
 - name: Copy settings file
   become: true
   ansible.builtin.copy:
-    remote_src: "/tmp/ravendb_settings.json"
+    remote_src: true 
+    src: "/tmp/ravendb_settings.json"
     dest: /etc/ravendb/settings.json
     owner: root
     group: ravendb
     mode: '0640'
   when: 
-    - ravendb_settings_override is not none
-    - ravendb_settings_override | length == 0
+    - not ravendb_binary.stat.exists
+    - ravendb_settings_override.keys() | length == 0
     - not (ravendb_secured_enabled | default(false))
 
 - name: Clear default settings json
@@ -198,63 +194,65 @@
   when: ravendb_should_update_binaries
   tags: config,ravendb_settings
 
-- name: Set ravendb_arch_so
-  set_fact:
-    ravendb_arch_so: "{{ ravendb_arch | regex_replace('-', '.') }}"
-  tags: binaries
+- block: 
+    - name: Set ravendb_arch_so
+      set_fact:
+        ravendb_arch_so: "{{ ravendb_arch | regex_replace('-', '.') }}"
+      tags: binaries
 
-- name: Copy arch specific files
-  ansible.builtin.copy:
-    remote_src: yes
-    src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_arch_so }}.so"
-    dest: "/usr/lib/ravendb/server/{{ item }}.so"
-    owner: root
-    group: ravendb
-    mode: '0644'
-  loop:
-    - librvnpal
-    - libsodium
-    - libzstd
-  when: 
-    - ravendb_should_update_binaries
-    - ravendb_version is regex('^4\.') and item != 'libzstd'
-  tags: binaries
+    - name: Copy arch specific files
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "/usr/lib/ravendb/server/{{ item }}.{{ ravendb_arch_so }}.so"
+        dest: "/usr/lib/ravendb/server/{{ item }}.so"
+        owner: root
+        group: ravendb
+        mode: '0644'
+      loop:
+        - librvnpal
+        - libsodium
+        - libzstd
+      when: 
+        - ravendb_should_update_binaries
+        - ravendb_version is regex('^4\.') and item != 'libzstd'
+      tags: binaries
 
-- name: Remove redundant sos
-  become: true
-  ansible.builtin.shell: find . -maxdepth 1 -type f -name "{{ item }}.*.so" ! -iname "*.{{ ravendb_arch_so }}.so" -exec rm -v {} \;
-  changed_when: true
-  loop:
-    - librvnpal
-    - libsodium
-    - libzstd
-  when: ravendb_should_update_binaries
-  tags: binaries
+    - name: Remove redundant sos
+      become: true
+      ansible.builtin.shell: find . -maxdepth 1 -type f -name "{{ item }}.*.so" ! -iname "*.{{ ravendb_arch_so }}.so" -exec rm -v {} \;
+      changed_when: true
+      loop:
+        - librvnpal
+        - libsodium
+        - libzstd
+      when: ravendb_should_update_binaries
+      tags: binaries
 
-- name: Adjust binaries permissions
-  become: true
-  ansible.builtin.file:
-    dest: /usr/lib/ravendb/server
-    owner: root
-    group: ravendb
-    mode: '0644'
-    recurse: yes
-  tags: binaries
+    - name: Adjust binaries permissions
+      become: true
+      ansible.builtin.file:
+        dest: /usr/lib/ravendb/server
+        owner: root
+        group: ravendb
+        mode: '0644'
+        recurse: yes
+      tags: binaries
 
-- name: Adjust executables permissions
-  become: true
-  ansible.builtin.file:
-    name: "{{ item }}"
-    owner: root
-    group: ravendb
-    mode: u=rx,g=rx
-  loop:
-    - "/usr/lib/ravendb/server/Raven.Server"
-    - "/usr/lib/ravendb/server/rvn"
-    - "/usr/lib/ravendb/server/Raven.Debug"
-    - "/usr/lib/ravendb/server"
-    - "/usr/lib/ravendb/server/createdump"
-  tags: binaries
+    - name: Adjust executables permissions
+      become: true
+      ansible.builtin.file:
+        name: "{{ item }}"
+        owner: root
+        group: ravendb
+        mode: u=rx,g=rx
+      loop:
+        - "/usr/lib/ravendb/server/Raven.Server"
+        - "/usr/lib/ravendb/server/rvn"
+        - "/usr/lib/ravendb/server/Raven.Debug"
+        - "/usr/lib/ravendb/server"
+        - "/usr/lib/ravendb/server/createdump"
+      tags: binaries
+  when: ansible_facts['os_family'] | lower == 'redhat'
 
 - name: Adjust directories permissions
   become: true

@@ -1,8 +1,7 @@
 import sys
 from ravendb_test_driver import RavenTestDriver
 from unittest import TestCase
-from ansible_collections.ravendb.community.plugins.modules.database import (
-handle_absent_state , handle_present_state)
+from ansible_collections.ravendb.community.plugins.modules.database import *
 
 class TestDBStateValidator(TestCase):
 
@@ -63,3 +62,48 @@ class TestDBStateValidator(TestCase):
 
         self.assertFalse(changed)
         self.assertIn(f"Database '{db_name}' does not exist.", message)
+
+class TestValidationFunctions(TestCase):
+    
+    def test_valid_url(self):
+        self.assertTrue(is_valid_url("https://example.com"))
+        self.assertTrue(is_valid_url("http://localhost:8080"))
+        self.assertFalse(is_valid_url("example.com"))
+        self.assertFalse(is_valid_url("://invalid-url"))
+
+    def test_valid_database_name(self):
+        self.assertTrue(is_valid_database_name("valid_db"))
+        self.assertTrue(is_valid_database_name("Valid-DB-123"))
+        self.assertFalse(is_valid_database_name("Invalid DB!"))
+        self.assertFalse(is_valid_database_name(""))
+
+    def test_valid_replication_factor(self):
+        self.assertTrue(is_valid_replication_factor(1))
+        self.assertTrue(is_valid_replication_factor(5))
+        self.assertFalse(is_valid_replication_factor(0))
+        self.assertFalse(is_valid_replication_factor(-1))
+        self.assertFalse(is_valid_replication_factor("two"))
+
+    def test_valid_secure_flag(self):
+        self.assertTrue(is_valid_bool(True))
+        self.assertTrue(is_valid_bool(False))
+        self.assertFalse(is_valid_bool(1))
+        self.assertFalse(is_valid_bool("true"))
+
+    def test_valid_certificate_paths(self):
+        with open("test_cert.pem", "w") as f:
+            f.write("dummy certificate content")
+        with open("test_ca.pem", "w") as f:
+            f.write("dummy CA content")
+
+        self.assertEqual(validate_paths("test_cert.pem", "test_ca.pem"), (True, None))
+        self.assertEqual(validate_paths("non_existing.pem"), (False, "Path does not exist: non_existing.pem"))
+
+        os.remove("test_cert.pem")
+        os.remove("test_ca.pem")
+
+    def test_valid_state(self):
+        self.assertTrue(is_valid_state("present"))
+        self.assertTrue(is_valid_state("absent"))
+        self.assertFalse(is_valid_state("running"))
+        self.assertFalse(is_valid_state(""))

@@ -14,6 +14,6 @@
         ravendb_settings_preset: default
         ravendb_secured_enabled: true
         ravendb_license_file: "license.json"
-        ravendb_admin_email: "omer@ravendb.net"
-        ravendb_domain: "my-test-domain"
+        ravendb_admin_email: "omer1@ravendb.net"
+        ravendb_domain: "my-test-domain1"
         ravendb_root_domain: "development.run"
