@@ -1,13 +1,7 @@
 ---
 - hosts: ravendb_nodes
   remote_user: root
-  tasks:
-  - name: Uninstall RavenDB
-    include_role:
-      name: ravendb_node
-      tasks_from: ravendb_uninstall.yml
-      
-  - name: Clean up Python prerequisites
-    include_role:
-      name: ravendb_node
-      tasks_from: ravendb_python_prerequisites_uninstall.yml
+  roles:
+    - role: "ravendb_node"
+      vars:
+        ravendb_state: absent

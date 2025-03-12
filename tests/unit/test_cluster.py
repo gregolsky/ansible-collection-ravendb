@@ -1,7 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from ansible_collections.ravendb.community.plugins.modules.node import add_node
+from ansible_collections.ravendb.community.plugins.modules.node import *
 import requests
+
 class TestAddNodeWithRavenDB(TestCase):
     
     def setUp(self):
@@ -108,4 +109,20 @@ class TestAddNodeWithRavenDB(TestCase):
             
             result = add_node(node, check_mode=False)
             self.assertFalse(result["changed"])
-            self.assertIn("Failed to add node A", result["msg"])    
+            self.assertIn("Failed to add node A", result["msg"])
+
+class TestValidationFunctions(TestCase):
+    def test_valid_url(self):
+        self.assertTrue(is_valid_url("https://example.com"))
+        self.assertTrue(is_valid_url("http://localhost:8080"))
+        self.assertFalse(is_valid_url("example.com"))
+        self.assertFalse(is_valid_url("://invalid-url"))
+        self.assertFalse(is_valid_url(123))
+
+    def test_valid_tag(self):
+        self.assertTrue(is_valid_tag("NODE1"))
+        self.assertTrue(is_valid_tag("CLUSTERX"))
+        self.assertFalse(is_valid_tag("node1"))
+        self.assertFalse(is_valid_tag("NODE-1"))
+        self.assertFalse(is_valid_tag(""))
+        self.assertFalse(is_valid_tag(123))

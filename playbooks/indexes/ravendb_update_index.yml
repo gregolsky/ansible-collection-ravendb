@@ -6,8 +6,8 @@
   tasks:
     - name: Include Python prerequisites
       include_role:
-        name: ravendb_node
-        tasks_from: ravendb_python_prerequisites.yml
+        name: ravendb.community.ravendb_node
+        tasks_from: ravendb_python_client_prerequisites.yml
 
     - name: Ensure RavenDB Index is present
       ravendb.community.index:

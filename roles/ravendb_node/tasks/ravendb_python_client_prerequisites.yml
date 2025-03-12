@@ -1,4 +1,12 @@
----
+- name: Gather facts explicitly
+  setup:
+  when: ansible_env is not defined
+
+- name: Set default virtual environment path
+  set_fact:
+    ravendb_venv_path: "{{ ansible_env.HOME }}/.ravendb_ansible"
+  when: ravendb_venv_path is not defined
+
 - name: Ensure Python3 is installed
   become: true
   ansible.builtin.package:
@@ -19,43 +27,43 @@
 
 - name: Check if Python binary exists in virtual environment
   stat:
-    path: /opt/ravendb_venv/bin/python
+    path: "{{ ravendb_venv_path }}/bin/python"
   register: venv_integrity
 
 - name: Recreate virtual environment if it is incomplete
   become: true
   ansible.builtin.command:
-    cmd: rm -rf /opt/ravendb_venv
+    cmd: rm -rf "{{ ravendb_venv_path }}"
   when: not venv_integrity.stat.exists
 
 - name: Create a virtual environment for Python
   become: true
   ansible.builtin.command:
-    cmd: python3 -m venv /opt/ravendb_venv
-    creates: /opt/ravendb_venv/bin/python
+    cmd: python3 -m venv "{{ ravendb_venv_path }}"
+    creates: "{{ ravendb_venv_path }}/bin/python"
 
 - name: Set Python interpreter to use virtual environment
   set_fact:
-    ansible_python_interpreter: /opt/ravendb_venv/bin/python
+    ansible_python_interpreter: "{{ ravendb_venv_path }}/bin/python"
 
 - name: Install pip explicitly after ensurepip
   become: true
   ansible.builtin.command:
-    cmd: /opt/ravendb_venv/bin/python -m ensurepip --default-pip
+    cmd: "{{ ravendb_venv_path }}/bin/python -m ensurepip --default-pip"
 
 - name: Upgrade pip in the virtual environment
   become: true
   ansible.builtin.command:
-    cmd: /opt/ravendb_venv/bin/python -m pip install --upgrade pip
+    cmd: "{{ ravendb_venv_path }}/bin/python -m pip install --upgrade pip"
 
 - name: Check Python version and pip location in virtual environment
   become: true
   ansible.builtin.command:
-    cmd: /opt/ravendb_venv/bin/python -m pip --version
+    cmd: "{{ ravendb_venv_path }}/bin/python -m pip --version"
   changed_when: false
 
 - name: Check if RavenDB client is installed in virtual environment
-  command: /opt/ravendb_venv/bin/pip show ravendb
+  command: "{{ ravendb_venv_path }}/bin/pip show ravendb"
   register: ravendb_installed
   failed_when: ravendb_installed.rc != 0 and ravendb_installed.rc != 1
   changed_when: false
@@ -63,5 +71,5 @@
 - name: Install RavenDB Python client in virtual environment
   become: true
   ansible.builtin.command:
-    cmd: /opt/ravendb_venv/bin/pip install ravendb
+    cmd: "{{ ravendb_venv_path }}/bin/pip install ravendb"
   when: ravendb_installed.rc == 1

@@ -3,7 +3,9 @@ from ravendb import DocumentStore, GetDatabaseNamesOperation
 from ravendb.serverwide.operations.common import CreateDatabaseOperation, DeleteDatabaseOperation
 from ravendb.serverwide.database_record import DatabaseRecord
 from ravendb.exceptions.raven_exceptions import RavenException
-import sys
+from urllib.parse import urlparse
+import re
+import os
 
 def create_store(url, secure, certificate_path, ca_cert_path):
     store = DocumentStore(urls=[url])
@@ -49,6 +51,27 @@ def handle_absent_state(store, database_name, check_mode):
     store.maintenance.server.send(delete_database_operation)
     return True, f"Database '{database_name}' deleted successfully."
    
+def is_valid_url(url):
+    parsed = urlparse(url)
+    return all([parsed.scheme, parsed.netloc])
+
+def is_valid_database_name(name):
+    return bool(re.match(r"^[a-zA-Z0-9_-]+$", name))
+
+def is_valid_replication_factor(factor):
+    return isinstance(factor, int) and factor > 0
+
+def is_valid_bool(value):
+    return isinstance(value, bool)
+
+def validate_paths(*paths):
+    for path in paths:
+        if path and not os.path.isfile(path):
+            return False, f"Path does not exist: {path}"
+    return True, None
+
+def is_valid_state(state):
+    return state in ['present', 'absent']
 
 def main():
     module_args = dict(
@@ -73,6 +96,25 @@ def main():
     certificate_path = module.params.get('certificate_path')
     ca_cert_path = module.params.get('ca_cert_path')
     desired_state = module.params['state']
+
+    if not is_valid_url(url):
+        module.fail_json(msg=f"Invalid URL: {url}")
+
+    if not is_valid_database_name(database_name):
+        module.fail_json(msg=f"Invalid database name: {database_name}. Only letters, numbers, dashes, and underscores are allowed.")
+
+    if not is_valid_replication_factor(replication_factor):
+        module.fail_json(msg=f"Invalid replication factor: {replication_factor}. Must be a positive integer.")
+
+    if not is_valid_bool(secure):
+        module.fail_json(msg=f"Invalid secure flag: {secure}. Must be a boolean.")
+
+    valid, error_msg = validate_paths(certificate_path, ca_cert_path)
+    if not valid:
+        module.fail_json(msg=error_msg)
+
+    if not is_valid_state(desired_state):
+        module.fail_json(msg=f"Invalid state: {desired_state}. Must be 'present' or 'absent'.")
 
     try:
         store = create_store(url, secure, certificate_path, ca_cert_path)

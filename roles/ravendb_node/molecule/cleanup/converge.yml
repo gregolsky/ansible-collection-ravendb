@@ -6,14 +6,12 @@
       include_role:
         name: ravendb_node
       vars:
+        ravendb_state: present
         ravendb_version: latest
         ravendb_version_minor: 6.2
         ravendb_release_channel: stable
         ravendb_arch: linux-x64
         ravendb_settings_preset: default
-        ravendb_settings_override:
-          Logs.Mode: "Information"
-          Security.UnsecuredAccessAllowed: "PublicNetwork"
 
     - name: Wait for port 8080 to become open
       tags: node_wait_for
@@ -48,7 +46,11 @@
           }
         status_code: 201
 
+- name: Cleanup
+  hosts: all
+  tasks:
     - name: Uninstall RavenDB
       include_role:
         name: ravendb_node
-        tasks_from: ravendb_uninstall.yml
+      vars:
+        ravendb_state: absent

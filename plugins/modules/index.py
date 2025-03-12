@@ -1,4 +1,6 @@
 import sys
+import os
+import re
 from ansible.module_utils.basic import AnsibleModule
 from ravendb import DocumentStore, AbstractIndexCreationTask
 from ravendb.documents.indexes.abstract_index_creation_tasks import AbstractMultiMapIndexCreationTask
@@ -7,6 +9,7 @@ from ravendb.documents.operations.indexes import (
     StartIndexOperation, StopIndexOperation, GetIndexingStatusOperation, ResetIndexOperation)
 from ravendb.documents.indexes.definitions import IndexRunningStatus
 from ravendb.exceptions.raven_exceptions import RavenException
+from urllib.parse import urlparse
 
 def create_dynamic_index(name, definition):
     class DynamicIndex(AbstractIndexCreationTask):
@@ -216,6 +219,31 @@ def apply_mode(store, index_name, mode, cluster_wide, check_mode):
         case 'reset':
             return reset_index(store, index_name, check_mode)
 
+def is_valid_url(url):
+    parsed = urlparse(url)
+    return all([parsed.scheme, parsed.netloc])
+
+def is_valid_name(name):
+    return bool(re.match(r"^[a-zA-Z0-9_-]+$", name))
+
+def is_valid_dict(value):
+    return isinstance(value, dict) or value is None
+
+def is_valid_bool(value):
+    return isinstance(value, bool)
+
+def validate_paths(*paths):
+    for path in paths:
+        if path and not os.path.isfile(path):
+            return False, f"Path does not exist: {path}"
+    return True, None
+
+def is_valid_state(state):
+    return state in [None, 'present', 'absent']
+
+def is_valid_mode(mode):
+    return mode in [None, 'resumed', 'paused', 'enabled', 'disabled', 'reset']
+
 
 def main():
     module_args = dict(
@@ -235,6 +263,45 @@ def main():
         argument_spec=module_args,
         supports_check_mode=True
     )
+
+    url = module.params['url']
+    database_name = module.params['database_name']
+    index_name = module.params['index_name']
+    index_definition = module.params.get('index_definition')
+    secure = module.params['secure']
+    certificate_path = module.params.get('certificate_path')
+    ca_cert_path = module.params.get('ca_cert_path')
+    state = module.params.get('state')
+    mode = module.params.get('mode')
+    cluster_wide = module.params['cluster_wide']
+
+    if not is_valid_url(url):
+        module.fail_json(msg=f"Invalid URL: {url}")
+
+    if not is_valid_name(database_name):
+        module.fail_json(msg=f"Invalid database name: {database_name}. Only letters, numbers, dashes, and underscores are allowed.")
+
+    if not is_valid_name(index_name):
+        module.fail_json(msg=f"Invalid index name: {index_name}. Only letters, numbers, dashes, and underscores are allowed.")
+
+    if not is_valid_dict(index_definition):
+        module.fail_json(msg=f"Invalid index definition: Must be a dictionary.")
+
+    if not is_valid_bool(secure):
+        module.fail_json(msg=f"Invalid secure flag: {secure}. Must be a boolean.")
+
+    valid, error_msg = validate_paths(certificate_path, ca_cert_path)
+    if not valid:
+        module.fail_json(msg=error_msg)
+
+    if not is_valid_state(state):
+        module.fail_json(msg=f"Invalid state: {state}. Must be 'present' or 'absent'.")
+
+    if not is_valid_mode(mode):
+        module.fail_json(msg=f"Invalid mode: {mode}. Must be one of 'resumed', 'paused', 'enabled', 'disabled', 'reset'.")
+
+    if not is_valid_bool(cluster_wide):
+        module.fail_json(msg=f"Invalid cluster_wide flag: {cluster_wide}. Must be a boolean.")
 
     try:
         store = initialize_ravendb_store(module.params)

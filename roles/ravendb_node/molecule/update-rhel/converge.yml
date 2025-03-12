@@ -11,7 +11,7 @@
           ravendb_version_minor: 5.4
           ravendb_settings_preset: default
           ravendb_license_file: "license.json"
-
+          
     - name: Wait for port 8080 to become open
       tags: node_wait_for
       wait_for:
@@ -53,4 +53,3 @@
         ravendb_state: present
         ravendb_version_minor: 6.2
         ravendb_settings_preset: default
-

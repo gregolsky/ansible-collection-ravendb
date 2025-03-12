@@ -1,9 +1,7 @@
 import sys
 from ravendb_test_driver import RavenTestDriver
 from unittest import TestCase
-from ansible_collections.ravendb.community.plugins.modules.index import (
-    reconcile_state
-)
+from ansible_collections.ravendb.community.plugins.modules.index import *
 from ravendb.documents.operations.indexes import GetIndexesOperation
 
 
@@ -224,3 +222,69 @@ class TestReconcileState(TestCase):
         self.assertEqual(status, "ok")
         self.assertFalse(changed)
         self.assertIn("Index 'test/index' is already absent.", message)
+
+
+class TestValidationFunctions(TestCase):
+    
+    def test_valid_url(self):
+        self.assertTrue(is_valid_url("https://example.com"))
+        self.assertTrue(is_valid_url("http://localhost:8080"))
+        self.assertFalse(is_valid_url("example.com"))
+        self.assertFalse(is_valid_url("://invalid-url"))
+
+    def test_valid_database_name(self):
+        self.assertTrue(is_valid_name("valid_db"))
+        self.assertTrue(is_valid_name("Valid-DB-123"))
+        self.assertFalse(is_valid_name("Invalid DB!"))
+        self.assertFalse(is_valid_name(""))
+
+    def test_valid_index_name(self):
+        self.assertTrue(is_valid_name("valid_index"))
+        self.assertTrue(is_valid_name("Index-123"))
+        self.assertFalse(is_valid_name("Invalid Index!"))
+        self.assertFalse(is_valid_name(""))
+
+    def test_valid_index_definition(self):
+        self.assertTrue(is_valid_dict({"field": "value"}))
+        self.assertTrue(is_valid_dict(None))
+        self.assertFalse(is_valid_dict("not a dict"))
+        self.assertFalse(is_valid_dict(["list"]))
+
+    def test_valid_secure_flag(self):
+        self.assertTrue(is_valid_bool(True))
+        self.assertTrue(is_valid_bool(False))
+        self.assertFalse(is_valid_bool(1))
+        self.assertFalse(is_valid_bool("true"))
+
+    def test_valid_certificate_paths(self):
+        with open("test_cert.pem", "w") as f:
+            f.write("dummy certificate content")
+        with open("test_ca.pem", "w") as f:
+            f.write("dummy CA content")
+
+        self.assertEqual(validate_paths("test_cert.pem", "test_ca.pem"), (True, None))
+        self.assertEqual(validate_paths("non_existing.pem"), (False, "Path does not exist: non_existing.pem"))
+
+        os.remove("test_cert.pem")
+        os.remove("test_ca.pem")
+
+    def test_valid_state(self):
+        self.assertTrue(is_valid_state("present"))
+        self.assertTrue(is_valid_state("absent"))
+        self.assertTrue(is_valid_state(None))
+        self.assertFalse(is_valid_state("running"))
+
+    def test_valid_mode(self):
+        self.assertTrue(is_valid_mode("resumed"))
+        self.assertTrue(is_valid_mode("paused"))
+        self.assertTrue(is_valid_mode("enabled"))
+        self.assertTrue(is_valid_mode("disabled"))
+        self.assertTrue(is_valid_mode("reset"))
+        self.assertTrue(is_valid_mode(None))
+        self.assertFalse(is_valid_mode("invalid_mode"))
+
+    def test_valid_cluster_wide(self):
+        self.assertTrue(is_valid_bool(True))
+        self.assertTrue(is_valid_bool(False))
+        self.assertFalse(is_valid_bool(1))
+        self.assertFalse(is_valid_bool("true"))

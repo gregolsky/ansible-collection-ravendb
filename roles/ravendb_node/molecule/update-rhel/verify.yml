@@ -25,7 +25,6 @@
           - ravendb_version_result.stdout.startswith('6.2')
         fail_msg: "Server version output: {{ ravendb_version_result.stdout }}"
 
-
     - name: Load settings.json
       become: yes
       slurp:
@@ -35,7 +34,7 @@
     - name: Set settings json var
       set_fact:
         settings: "{{ settings_file['content'] | b64decode }}"
-   
+
     - name: Assert it's unsecured
       assert:
         that: settings | json_query('ServerUrl') | regex_search('^http:') | length > 0
