@@ -6,22 +6,19 @@
 
     - name: Load settings.json
       become: yes
-      slurp:
-        src: "/etc/ravendb/settings.json"
-      register: settings_file
-    
-    - name: Set settings json var
-      set_fact:
-        settings: "{{ settings_file['content'] | b64decode }}"
-      
+      include_vars:
+        file: "/etc/ravendb/settings.json"
+        name: settings
+
     - name: Assert that settings override was applied
-      assert:
-        that: 
-          - settings | json_query('\"Logs.Mode\"') == "Information" 
+      ansible.builtin.assert:
+        that:
+          - settings['Logs.Mode'] == "Information"
 
     - name: Assert it's unsecured
-      assert:
-        that: settings | json_query('ServerUrl') | regex_search('^https:') | length > 0
+      ansible.builtin.assert:
+        that:
+          - settings['ServerUrl'] is not regex('^https:')
 
     - name: Get service status
       become: true

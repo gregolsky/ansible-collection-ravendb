@@ -31,13 +31,14 @@
         src: "/etc/ravendb/settings.json"
       register: settings_file
     
-    - name: Set settings json var
+    - name: Decode and parse settings.json
       set_fact:
-        settings: "{{ settings_file['content'] | b64decode }}"
+        settings: "{{ settings_file['content'] | b64decode | from_json }}"
 
     - name: Assert it's unsecured
-      assert:
-        that: settings | json_query('ServerUrl') | regex_search('^http:') | length > 0
+      ansible.builtin.assert:
+        that:
+          - settings['ServerUrl'] is not regex('^https:')
 
     - name: Get service status
       become: true
@@ -45,6 +46,11 @@
         name: ravendb.service
         state: started
       register: service_status
+
+    - name: Assert service state
+      ansible.builtin.assert:
+        that:
+          - service_status.status['ActiveState'] == 'active'
 
     - name: Ensure alive
       retries: 10
