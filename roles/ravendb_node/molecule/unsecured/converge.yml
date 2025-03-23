@@ -12,6 +12,5 @@
         ravendb_release_channel: stable
         ravendb_arch: linux-x64
         ravendb_settings_preset: default
-        ravendb_license_file: "license.json"
         ravendb_settings_override:
           Logs.Mode: "Information"

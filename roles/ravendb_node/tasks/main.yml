@@ -1,11 +1,11 @@
 ---
 
 - name: Install prerequisites for RHEL
-  import_tasks: redhat.yml
+  include_tasks: redhat.yml
   when: ansible_facts['os_family'] | lower == 'redhat' and ravendb_state | default("present") == "present"
 
 - name: Install prerequisites for Debian
-  import_tasks: debian.yml
+  include_tasks: debian.yml
   when: ansible_facts['os_family'] | lower == 'debian' and ravendb_state | default("present") == "present"
 
 - name: Install RavenDB

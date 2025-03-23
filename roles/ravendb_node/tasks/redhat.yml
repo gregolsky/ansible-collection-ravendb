@@ -7,6 +7,7 @@
     - jq
     - libicu
     - unzip
+  when: molecule is not defined
 
 - block:
   - name: Determine download url for latest version
@@ -28,4 +29,5 @@
     ansible.builtin.get_url:
         url: "{{ ravendb_download_url }}"
         dest: /tmp/ravendb.tar.bz2
+        timeout: 30 
   tags: download

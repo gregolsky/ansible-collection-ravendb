@@ -8,14 +8,16 @@ driver:
     '44443': 443
 platforms:
   - name: centos
-    image: 'trfore/docker-centos9-systemd'
+    image: thegoldenplatypus/custom-centos9-python39-privileged:latest
+    pre_build_image: true
     privileged: true
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:rw'
     tmpfs:
       - /run
       - /tmp
-    command: /lib/systemd/systemd
+    cgroupns_mode: host  
+    command: /usr/sbin/init
 lint: |
   set -e
   yamllint .

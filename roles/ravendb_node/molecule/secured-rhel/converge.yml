@@ -6,6 +6,7 @@
       include_role:
         name: "ravendb_node"
       vars:
+        molecule: true
         ravendb_state: present
         ravendb_version: latest
         ravendb_version_minor: 6.2
