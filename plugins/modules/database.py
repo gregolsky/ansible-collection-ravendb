@@ -7,9 +7,9 @@ from urllib.parse import urlparse
 import re
 import os
 
-def create_store(url, secure, certificate_path, ca_cert_path):
+def create_store(url, certificate_path,  ca_cert_path):
     store = DocumentStore(urls=[url])
-    if secure and certificate_path:
+    if certificate_path and ca_cert_path:
         store.certificate_pem_path = certificate_path
         store.trust_store_path = ca_cert_path
     store.initialize()
@@ -78,7 +78,6 @@ def main():
         url=dict(type='str', required=True),
         database_name=dict(type='str', required=True),
         replication_factor=dict(type='int', default=1),
-        secure=dict(type='bool', default=False),
         certificate_path=dict(type='str', required=False),
         ca_cert_path=dict(type='str', required=False),
         state=dict(type='str', choices=['present', 'absent'], default='present')
@@ -92,7 +91,6 @@ def main():
     url = module.params['url']
     database_name = module.params['database_name']
     replication_factor = module.params['replication_factor']
-    secure = module.params['secure']
     certificate_path = module.params.get('certificate_path')
     ca_cert_path = module.params.get('ca_cert_path')
     desired_state = module.params['state']
@@ -106,8 +104,6 @@ def main():
     if not is_valid_replication_factor(replication_factor):
         module.fail_json(msg=f"Invalid replication factor: {replication_factor}. Must be a positive integer.")
 
-    if not is_valid_bool(secure):
-        module.fail_json(msg=f"Invalid secure flag: {secure}. Must be a boolean.")
 
     valid, error_msg = validate_paths(certificate_path, ca_cert_path)
     if not valid:
@@ -117,7 +113,7 @@ def main():
         module.fail_json(msg=f"Invalid state: {desired_state}. Must be 'present' or 'absent'.")
 
     try:
-        store = create_store(url, secure, certificate_path, ca_cert_path)
+        store = create_store(url, certificate_path, ca_cert_path)
         check_mode = module.check_mode
 
         if desired_state == 'present':

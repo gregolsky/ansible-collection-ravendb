@@ -5,7 +5,7 @@
     - role: "ravendb_node"
       vars:
           ravendb_state: present
-          ravendb_version_minor: 5.4
+          ravendb_version_minor: 6.2
           ravendb_settings_preset: default
           ravendb_hostname: "{{ ansible_host }}"
           ravendb_license_file: "license.json"

@@ -84,12 +84,6 @@ class TestValidationFunctions(TestCase):
         self.assertFalse(is_valid_replication_factor(-1))
         self.assertFalse(is_valid_replication_factor("two"))
 
-    def test_valid_secure_flag(self):
-        self.assertTrue(is_valid_bool(True))
-        self.assertTrue(is_valid_bool(False))
-        self.assertFalse(is_valid_bool(1))
-        self.assertFalse(is_valid_bool("true"))
-
     def test_valid_certificate_paths(self):
         with open("test_cert.pem", "w") as f:
             f.write("dummy certificate content")

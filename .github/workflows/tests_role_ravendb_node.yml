@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  test-debian-setup-sceanrios:
+  test-debian-setup-scenarios:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -46,7 +46,7 @@ jobs:
         working-directory: roles/ravendb_node
         run: molecule test -s cleanup
 
-  test-rhel-setup-sceanrios:
+  test-rhel-setup-scenarios:
       runs-on: ubuntu-latest
       steps:
         - name: Checkout code
@@ -85,7 +85,7 @@ jobs:
           working-directory: roles/ravendb_node
           run: molecule test -s cleanup-rhel
 
-  test-ravnedb-modules:
+  test-ravendb-modules:
       runs-on: ubuntu-latest
       steps:
         - name: Checkout code
@@ -108,7 +108,7 @@ jobs:
           run: |
             wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
             chmod +x dotnet-install.sh
-            ./dotnet-install.sh --runtime aspnetcore --version 8.0.12   
+            ./dotnet-install.sh --runtime aspnetcore --channel 8.0.0
 
         - name: Install dependencies
           run: |
@@ -118,7 +118,7 @@ jobs:
         - name: Build ansible galaxy collection
           run: |
             ansible-galaxy collection build .
-            ansible-galaxy collection install ./ravendb-community-1.0.0.tar.gz --force -p ./
+            ansible-galaxy collection install ./ravendb-community-*.tar.gz --force -p ./
 
         - name: Set up .NET environment variables
           run: |

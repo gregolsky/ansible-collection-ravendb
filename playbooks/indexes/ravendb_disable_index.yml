@@ -3,12 +3,10 @@
   hosts: ravendb_nodes
   gather_facts: no
 
-  tasks:
-    - name: Include Python prerequisites
-      include_role:
-        name: ravendb.community.ravendb_node
-        tasks_from: ravendb_python_client_prerequisites.yml
+  roles:
+    - ravendb.community.ravendb_python_client_prerequisites
 
+  tasks:
     - name: Ensure RavenDB Index is disabled (check mode)
       ravendb.community.index:
         url: "http://{{ ansible_host }}:8080"
