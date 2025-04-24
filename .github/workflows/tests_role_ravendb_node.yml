@@ -108,7 +108,7 @@ jobs:
           run: |
             wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
             chmod +x dotnet-install.sh
-            ./dotnet-install.sh --runtime aspnetcore --channel 8.0.0
+            ./dotnet-install.sh --runtime aspnetcore --channel 8.0
 
         - name: Install dependencies
           run: |
