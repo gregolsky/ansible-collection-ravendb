@@ -6,12 +6,10 @@
   vars:
     ravendb_venv_path: "/opt/ravendb_venv" # override default venv path
 
-  tasks:
-    - name: Include Python prerequisites
-      include_role:
-        name: ravendb.community.ravendb_node
-        tasks_from: ravendb_python_client_prerequisites.yml
+  roles:
+    - ravendb.community.ravendb_python_client_prerequisites
 
+  tasks:
     - name: Ensure RavenDB Index is present (check mode)
       ravendb.community.index:
         url: "http://{{ ansible_host }}:8080"

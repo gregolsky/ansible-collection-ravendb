@@ -42,12 +42,11 @@ def create_dynamic_multimap_index(name, definition):
 def initialize_ravendb_store(params):
     url = params['url']
     database_name = params['database_name']
-    secure = params['secure']
     certificate_path = params.get('certificate_path')
     ca_cert_path = params.get('ca_cert_path')
 
     store = DocumentStore(urls=[url], database=database_name)
-    if secure and certificate_path:
+    if certificate_path and ca_cert_path:
         store.certificate_pem_path = certificate_path
         store.trust_store_path = ca_cert_path
 
@@ -251,7 +250,6 @@ def main():
         database_name=dict(type='str', required=True),
         index_name=dict(type='str', required=True),
         index_definition=dict(type='dict', required=False),
-        secure=dict(type='bool', default=False),
         certificate_path=dict(type='str', required=False),
         ca_cert_path=dict(type='str', required=False),
         state=dict(type='str', choices=['present', 'absent'], required=False),
@@ -268,7 +266,6 @@ def main():
     database_name = module.params['database_name']
     index_name = module.params['index_name']
     index_definition = module.params.get('index_definition')
-    secure = module.params['secure']
     certificate_path = module.params.get('certificate_path')
     ca_cert_path = module.params.get('ca_cert_path')
     state = module.params.get('state')
@@ -286,9 +283,6 @@ def main():
 
     if not is_valid_dict(index_definition):
         module.fail_json(msg=f"Invalid index definition: Must be a dictionary.")
-
-    if not is_valid_bool(secure):
-        module.fail_json(msg=f"Invalid secure flag: {secure}. Must be a boolean.")
 
     valid, error_msg = validate_paths(certificate_path, ca_cert_path)
     if not valid:

@@ -54,7 +54,7 @@ galaxy_info:
     - automation
     - ansible
     - ubuntu
-    - redhat
+    - rhel
     - indexing
     
 dependencies: []

@@ -15,7 +15,7 @@ argument_specs:
       ravendb_version_minor:
         type: float
         required: false
-        default: 5.4
+        default: 6.2
         description: "Minor version of RavenDB to install."
 
       ravendb_settings_preset:
