@@ -14,18 +14,44 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]
-        ansible-core:
-          - stable-2.15
-          - stable-2.16
-          - stable-2.17
         include:
+          - python-version: "3.9"
+            ansible-core: stable-2.15
           - python-version: "3.10"
+            ansible-core: stable-2.15
+          - python-version: "3.11"
+            ansible-core: stable-2.15
+
+          - python-version: "3.10"
+            ansible-core: stable-2.16
+          - python-version: "3.11"
+            ansible-core: stable-2.16
+          - python-version: "3.12"
+            ansible-core: stable-2.16
+
+          - python-version: "3.10"
+            ansible-core: stable-2.17
+          - python-version: "3.11"
+            ansible-core: stable-2.17
+          - python-version: "3.12"
+            ansible-core: stable-2.17
+
+          - python-version: "3.11"
+            ansible-core: devel
+          - python-version: "3.12"
+            ansible-core: devel
+          - python-version: "3.13"
             ansible-core: devel
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Fix collection path for ansible-test #should be removed once we restructre
+        run: |
+          mkdir -p ansible_collections/ravendb/community
+          rsync -av --exclude ansible_collections ./ ansible_collections/ravendb/community
+          cd ansible_collections/ravendb/community
+        
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -37,6 +63,7 @@ jobs:
           pip install "ansible-core@https://github.com/ansible/ansible/archive/${{ matrix.ansible-core }}.tar.gz"
 
       - name: Run ansible-test sanity
+        working-directory: ansible_collections/ravendb/community
         run: |
           ansible-test sanity --python ${{ matrix.python-version }} --docker -v --color
   
