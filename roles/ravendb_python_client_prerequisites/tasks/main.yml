@@ -73,3 +73,15 @@
   ansible.builtin.command:
     cmd: "{{ ravendb_venv_path }}/bin/pip install ravendb"
   when: ravendb_installed.rc == 1
+
+- name: Check if requests is installed in virtual environment
+  command: "{{ ravendb_venv_path }}/bin/pip show requests"
+  register: requests_installed
+  failed_when: requests_installed.rc != 0 and requests_installed.rc != 1
+  changed_when: false
+
+- name: Install requests in virtual environment
+  become: true
+  ansible.builtin.command:
+    cmd: "{{ ravendb_venv_path }}/bin/pip install requests"
+  when: requests_installed.rc == 1

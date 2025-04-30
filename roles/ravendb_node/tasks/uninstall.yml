@@ -74,4 +74,3 @@
       
     - name: Clean up Python prerequisites
       import_tasks: ravendb_python_client_prerequisites_uninstall.yml
-

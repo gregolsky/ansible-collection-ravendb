@@ -1,12 +1,45 @@
-name: ravendb_node role tests 
+name: CI 
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  schedule:
+    - cron: "0 10 * * 1" # every Monday at 10:00 UTC
 
 jobs:
+  sanity:
+    name: Ansible Sanity Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+        ansible-core:
+          - stable-2.15
+          - stable-2.16
+          - stable-2.17
+        include:
+          - python-version: "3.10"
+            ansible-core: devel
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "ansible-core@https://github.com/ansible/ansible/archive/${{ matrix.ansible-core }}.tar.gz"
+
+      - name: Run ansible-test sanity
+        run: |
+          ansible-test sanity --python ${{ matrix.python-version }} --docker -v --color
+  
   test-debian-setup-scenarios:
     runs-on: ubuntu-latest
     steps:
