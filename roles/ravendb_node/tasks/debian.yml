@@ -45,4 +45,3 @@
         url: "{{ ravendb_download_url }}"
         dest: /tmp/ravendb.deb
   tags: download
-

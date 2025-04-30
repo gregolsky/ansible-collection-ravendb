@@ -7,11 +7,11 @@
     ravendb_venv_path: "/opt/ravendb_venv" # override default venv path
 
   roles:
-    - ravendb.community.ravendb_python_client_prerequisites
+    - community.ravendb.ravendb_python_client_prerequisites
 
   tasks:
     - name: Ensure RavenDB Index is present (check mode)
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersByName"
@@ -31,7 +31,7 @@
       check_mode: yes
 
     - name: Ensure RavenDB Index is present
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersByName"
@@ -50,7 +50,7 @@
         state: present
 
     - name: Ensure RavenDB Index is present (idempotency check)
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersByName"

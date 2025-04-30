@@ -6,7 +6,7 @@
 
   tasks:
     - name: Join Node B as Watcher
-      ravendb.community.node:
+      community.ravendb.node:
         node:
           tag: B
           type: "Watcher"
@@ -15,7 +15,7 @@
 
 
     - name: Join Node C as Member
-      ravendb.community.node:
+      community.ravendb.node:
         node:
           tag: C
           url: "http://192.168.118.77:8080"

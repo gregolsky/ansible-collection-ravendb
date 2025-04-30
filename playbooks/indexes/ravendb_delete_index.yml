@@ -4,11 +4,11 @@
   gather_facts: no
 
   roles:
-    - ravendb.community.ravendb_python_client_prerequisites
+    - community.ravendb.ravendb_python_client_prerequisites
 
   tasks:
     - name: Ensure RavenDB index is absent (check mode)
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersByName"
@@ -16,19 +16,15 @@
       check_mode: yes
 
     - name: Ensure RavenDB index is absent
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         index_name: "UsersByName"
         database_name: "my_database"
         state: absent
 
     - name: Ensure RavenDB index is absent (idempotency check)
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         index_name: "UsersByName"
         database_name: "my_database"
         state: absent
-
-
-
-

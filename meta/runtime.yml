@@ -1,4 +1,1 @@
-requires_ansible: '>=2.10'
-
-dependencies:
-  - name: ravendb.community.ravendb_python_client_prerequisites
+requires_ansible: '>=2.15.0'

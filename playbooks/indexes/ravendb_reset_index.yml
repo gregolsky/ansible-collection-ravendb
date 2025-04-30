@@ -4,11 +4,11 @@
   gather_facts: no
 
   roles:
-    - ravendb.community.ravendb_python_client_prerequisites
+    - community.ravendb.ravendb_python_client_prerequisites
 
   tasks:
     - name: Ensure RavenDB Index is reset (check mode)
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "Orders/ByCompany"
@@ -16,14 +16,14 @@
       check_mode: yes
 
     - name: Ensure RavenDB Index is reset
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "Orders/ByCompany"
         mode: reset
         
     - name: Ensure RavenDB Index is reset (idempotency check)
-      ravendb.community.index:
+      community.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "Orders/ByCompany"

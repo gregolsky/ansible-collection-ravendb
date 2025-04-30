@@ -4,26 +4,24 @@
   gather_facts: no
 
   roles:
-    - ravendb.community.ravendb_python_client_prerequisites
+    - community.ravendb.ravendb_python_client_prerequisites
 
   tasks:
     - name: Ensure RavenDB database is absent (check mode)
-      ravendb.community.database:
+      community.ravendb.database:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         state: absent
       check_mode: yes
 
     - name: Ensure RavenDB database is absent
-      ravendb.community.database:
+      community.ravendb.database:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         state: absent
 
     - name: Ensure RavenDB database is absent (idempotency check)
-      ravendb.community.database:
+      community.ravendb.database:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         state: absent
-
-

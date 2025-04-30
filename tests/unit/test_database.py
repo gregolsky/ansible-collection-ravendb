@@ -1,70 +1,93 @@
-import sys
+# Copyright (c), RavenDB
+# GNU General Public License v3.0 or later (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
+
+import os
 from ravendb_test_driver import RavenTestDriver
 from unittest import TestCase
-from ansible_collections.ravendb.community.plugins.modules.database import *
+from ansible_collections.commravendb.communitygins.modules.database import (
+    handle_present_state,
+    handle_absent_state,
+    is_valid_url,
+    is_valid_database_name,
+    is_valid_replication_factor,
+    validate_paths,
+    is_valid_state,
+    is_valid_database_name,
+    is_valid_replication_factor,
+    is_valid_state
+)
+
 
 class TestDBStateValidator(TestCase):
 
     def setUp(self):
-      super().setUp()
-      self.test_driver = RavenTestDriver()
+        super().setUp()
+        self.test_driver = RavenTestDriver()
 
     def test_create_database(self):
-        
-        store = self.test_driver.get_document_store(database="test_create_database")
 
-        db_name="test_db"
-        replication_factor=1
-        check_mode=False
+        store = self.test_driver.get_document_store(
+            database="test_create_database")
 
-        changed, message = handle_present_state(store, db_name, replication_factor, check_mode)
+        db_name = "test_db"
+        replication_factor = 1
+        check_mode = False
+
+        changed, message = handle_present_state(
+            store, db_name, replication_factor, check_mode)
         self.assertTrue(changed)
         self.assertIn(f"Database '{db_name}' created successfully.", message)
 
     def test_create_already_created_database(self):
-      
-        store = self.test_driver.get_document_store(database="test_create_already_created_database")
 
-        db_name="test_db1"
-        replication_factor=1
-        check_mode=False
+        store = self.test_driver.get_document_store(
+            database="test_create_already_created_database")
 
-        changed, message = handle_present_state(store, db_name, replication_factor, check_mode)
-        changed, message = handle_present_state(store, db_name, replication_factor, check_mode)
+        db_name = "test_db1"
+        replication_factor = 1
+        check_mode = False
+
+        changed, message = handle_present_state(
+            store, db_name, replication_factor, check_mode)
+        changed, message = handle_present_state(
+            store, db_name, replication_factor, check_mode)
 
         self.assertFalse(changed)
         self.assertIn(f"Database '{db_name}' already exists.", message)
 
-
     def test_delete_database(self):
-      
-        store = self.test_driver.get_document_store(database="test_delete_database")
 
-        db_name="test_db2"
-        replication_factor=1
-        check_mode=False
+        store = self.test_driver.get_document_store(
+            database="test_delete_database")
 
-        changed, message = handle_present_state(store, db_name, replication_factor, check_mode)
+        db_name = "test_db2"
+        replication_factor = 1
+        check_mode = False
+
+        changed, message = handle_present_state(
+            store, db_name, replication_factor, check_mode)
         changed, message = handle_absent_state(store, db_name, check_mode)
 
         self.assertTrue(changed)
         self.assertIn(f"Database '{db_name}' deleted successfully.", message)
 
-
     def test_delete_non_exist_database(self):
-      
-        store = self.test_driver.get_document_store(database="test_delete_non_exist_database")
 
-        db_name="test_db3"
-        check_mode=False
+        store = self.test_driver.get_document_store(
+            database="test_delete_non_exist_database")
+
+        db_name = "test_db3"
+        check_mode = False
 
         changed, message = handle_absent_state(store, db_name, check_mode)
 
         self.assertFalse(changed)
         self.assertIn(f"Database '{db_name}' does not exist.", message)
 
+
 class TestValidationFunctions(TestCase):
-    
+
     def test_valid_url(self):
         self.assertTrue(is_valid_url("https://example.com"))
         self.assertTrue(is_valid_url("http://localhost:8080"))
@@ -90,8 +113,11 @@ class TestValidationFunctions(TestCase):
         with open("test_ca.pem", "w") as f:
             f.write("dummy CA content")
 
-        self.assertEqual(validate_paths("test_cert.pem", "test_ca.pem"), (True, None))
-        self.assertEqual(validate_paths("non_existing.pem"), (False, "Path does not exist: non_existing.pem"))
+        self.assertEqual(
+            validate_paths(
+                "test_cert.pem", "test_ca.pem"), (True, None))
+        self.assertEqual(validate_paths("non_existing.pem"),
+                         (False, "Path does not exist: non_existing.pem"))
 
         os.remove("test_cert.pem")
         os.remove("test_ca.pem")
