@@ -63,7 +63,7 @@ options:
           - absent
         default: present
 requirements:
-    - python >= 3.8
+    - python >= 3.9
     - ravendb python client
     - ASP.NET Core Runtime
     - Role community.ravendb.ravendb_python_client_prerequisites must be installed before using this module.

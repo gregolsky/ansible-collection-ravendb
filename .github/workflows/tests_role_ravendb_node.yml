@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10"]
         ansible-core:
           - stable-2.15
           - stable-2.16
@@ -151,7 +151,7 @@ jobs:
         - name: Build ansible galaxy collection
           run: |
             ansible-galaxy collection build .
-            ansible-galaxy collection install ./ravendb-community-*.tar.gz --force -p ./
+            ansible-galaxy collection install ./community-ravendb-*.tar.gz --force -p ./
 
         - name: Set up .NET environment variables
           run: |

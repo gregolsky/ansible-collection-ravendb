@@ -33,7 +33,7 @@ Tested with the current ansible-core 2.15, ansible-core 2.16, ansible-core 2.17,
 - [ravendb-python-client](https://pypi.org/project/ravendb/) - latest version supported only. Please upgrade your ravendb-python-client driver version if you encounter difficulties.
 - [requests](https://pypi.org/project/requests/);
 
-All modules and plugins require Python 3.8 or later.
+All modules and plugins require Python 3.9 or later.
 
 ## Using this collection
 
