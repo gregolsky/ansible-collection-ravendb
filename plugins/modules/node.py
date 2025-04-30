@@ -27,7 +27,7 @@ options:
         required: true
         type: dict
 requirements:
-    - python >= 3.8
+    - python >= 3.9
     - requests
     - Role community.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
 seealso:
