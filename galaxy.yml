@@ -3,7 +3,7 @@ name: ravendb
 version: 1.0.0
 readme: README.md
 authors:
-- Grzegorz Lachowski <gregory.lachowski@gmail.com>
+- Grzegorz Lachowski <gregolsky@ravendb.net>
 - Omer Ratsaby <omer.ratsaby@ravendb.net>
 description: your collection description
 license:
