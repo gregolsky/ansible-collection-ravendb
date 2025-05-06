@@ -5,7 +5,7 @@ readme: README.md
 authors:
 - Grzegorz Lachowski <gregolsky@ravendb.net>
 - Omer Ratsaby <omer.ratsaby@ravendb.net>
-description: your collection description
+description: An Ansible collection for deploying, configuring, and managing RavenDB clusters on Linux-based environments.
 license:
 - GPL-3.0-or-later
 license_file: ''
