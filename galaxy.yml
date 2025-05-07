@@ -1,4 +1,4 @@
-namespace: community
+namespace: ravendb
 name: ravendb
 version: 1.0.0
 readme: README.md

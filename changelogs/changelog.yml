@@ -4,10 +4,10 @@ releases:
     version: "1.0.0"
     changes:
       - major_changes:
-          - Initial release of the `community.ravendb` collection.
+          - Initial release of the `ravendb.ravendb` collection.
           - Added `ravendb_node` role for setting up RavenDB servers.
           - Added `ravendb_python_client_prerequisites` role for Python dependency management.
           - Added modules:
-              - "`community.ravendb.database` to manage RavenDB databases."
-              - "`community.ravendb.index` to manage RavenDB indexes and index modes."
-              - "`community.ravendb.node` to add nodes to a RavenDB cluster."
+              - "`ravendb.ravendb.database` to manage RavenDB databases."
+              - "`ravendb.ravendb.index` to manage RavenDB indexes and index modes."
+              - "`ravendb.ravendb.node` to add nodes to a RavenDB cluster."

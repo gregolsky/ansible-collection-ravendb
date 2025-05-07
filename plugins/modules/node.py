@@ -29,7 +29,7 @@ options:
 requirements:
     - python >= 3.9
     - requests
-    - Role community.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
+    - Role ravendb.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
 seealso:
   - name: RavenDB documentation
     description: Official RavenDB documentation
@@ -42,7 +42,7 @@ notes:
 
 EXAMPLES = '''
 - name: Join Node B as a Watcher
-  community.ravendb.node:
+  ravendb.ravendb.node:
     node:
       tag: B
       type: "Watcher"
@@ -50,14 +50,14 @@ EXAMPLES = '''
       leader_url: "http://192.168.117.90:8080"
 
 - name: Join Node C as a Member
-  community.ravendb.node:
+  ravendb.ravendb.node:
     node:
       tag: C
       url: "http://192.168.118.77:8080"
       leader_url: "http://192.168.117.90:8080"
 
 - name: Simulate adding Node D (check mode)
-  community.ravendb.node:
+  ravendb.ravendb.node:
     node:
       tag: D
       url: "http://192.168.118.200:8080"

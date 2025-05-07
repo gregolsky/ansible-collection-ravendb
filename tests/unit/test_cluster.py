@@ -4,7 +4,7 @@
 
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from ansible_collections.community.ravendb.plugins.modules.node import add_node, is_valid_url, is_valid_tag
+from ansible_collections.ravendb.ravendb.plugins.modules.node import add_node, is_valid_url, is_valid_tag
 import requests
 
 

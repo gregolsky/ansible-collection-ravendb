@@ -5,7 +5,7 @@
 import os
 from ravendb_test_driver import RavenTestDriver
 from unittest import TestCase
-from ansible_collections.community.ravendb.plugins.modules.database import (
+from ansible_collections.ravendb.ravendb.plugins.modules.database import (
     handle_present_state,
     handle_absent_state,
     is_valid_url,
