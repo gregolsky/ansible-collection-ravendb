@@ -48,9 +48,9 @@ jobs:
 
       - name: Fix collection path for ansible-test #should be removed once we restructre
         run: |
-          mkdir -p ansible_collections/ravendb/community
-          rsync -av --exclude ansible_collections ./ ansible_collections/ravendb/community
-          cd ansible_collections/ravendb/community
+          mkdir -p ansible_collections/ravendb/ravendb
+          rsync -av --exclude ansible_collections ./ ansible_collections/ravendb/ravendb
+          cd ansible_collections/ravendb/ravendb
         
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -63,7 +63,7 @@ jobs:
           pip install "ansible-core@https://github.com/ansible/ansible/archive/${{ matrix.ansible-core }}.tar.gz"
 
       - name: Run ansible-test sanity
-        working-directory: ansible_collections/ravendb/community
+        working-directory: ansible_collections/ravendb/ravendb
         run: |
           ansible-test sanity --python ${{ matrix.python-version }} --docker -v --color
   
@@ -178,7 +178,7 @@ jobs:
         - name: Build ansible galaxy collection
           run: |
             ansible-galaxy collection build .
-            ansible-galaxy collection install ./community-ravendb-*.tar.gz --force -p ./
+            ansible-galaxy collection install ./ravendb-ravendb-*.tar.gz --force -p ./
 
         - name: Set up .NET environment variables
           run: |
