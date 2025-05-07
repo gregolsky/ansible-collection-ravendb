@@ -83,19 +83,19 @@ requirements:
     - python >= 3.9
     - ravendb python client
     - ASP.NET Core Runtime
-    - Role community.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
+    - Role ravendb.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
 seealso:
     - name: RavenDB documentation
       description: Official RavenDB documentation
       link: https://ravendb.net/docs
 notes:
-  - The role C(community.ravendb.ravendb_python_client_prerequisites) must be applied before using this module.
+  - The role C(ravendb.ravendb.ravendb_python_client_prerequisites) must be applied before using this module.
   - Requires the ASP.NET Core Runtime to be installed on the target system.
 '''
 
 EXAMPLES = '''
 - name: Create a RavenDB index with map and reduce
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "UsersByName"
@@ -114,7 +114,7 @@ EXAMPLES = '''
     state: present
 
 - name: Create a RavenDB multi-map index
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "UsersAndOrdersByName"
@@ -136,14 +136,14 @@ EXAMPLES = '''
     state: present
 
 - name: Delete a RavenDB index
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "UsersByName"
     state: absent
 
 - name: Disable a RavenDB index (cluster-wide)
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "Orders/ByCompany"
@@ -151,35 +151,35 @@ EXAMPLES = '''
     cluster_wide: true
 
 - name: Enable a RavenDB index
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "Orders/ByCompany"
     mode: enabled
 
 - name: Pause a RavenDB index
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "Orders/ByCompany"
     mode: paused
 
 - name: Resume a RavenDB index
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "Orders/ByCompany"
     mode: resumed
 
 - name: Reset a RavenDB index
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "Orders/ByCompany"
     mode: reset
 
 - name: Update an existing RavenDB index definition
-  community.ravendb.index:
+  ravendb.ravendb.index:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     index_name: "UsersByName"

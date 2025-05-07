@@ -2,7 +2,7 @@
 # GNU General Public License v3.0 or later (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from ansible_collections.community.ravendb.plugins.modules.index import (
+from ansible_collections.ravendb.ravendb.plugins.modules.index import (
     enable_index,
     disable_index,
     resume_index,

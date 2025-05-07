@@ -4,11 +4,11 @@
   gather_facts: no
 
   roles:
-    - community.ravendb.ravendb_python_client_prerequisites
+    - ravendb.ravendb.ravendb_python_client_prerequisites
 
   tasks:
     - name: Ensure RavenDB Index is present (check mode)
-      community.ravendb.index:
+      ravendb.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersAndOrdersByName"
@@ -31,7 +31,7 @@
       check_mode: yes
 
     - name: Ensure RavenDB Index is present
-      community.ravendb.index:
+      ravendb.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersAndOrdersByName"
@@ -53,7 +53,7 @@
         state: present
 
     - name: Ensure RavenDB Index is present (idempotency check)
-      community.ravendb.index:
+      ravendb.ravendb.index:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         index_name: "UsersAndOrdersByName"

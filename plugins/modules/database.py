@@ -66,33 +66,33 @@ requirements:
     - python >= 3.9
     - ravendb python client
     - ASP.NET Core Runtime
-    - Role community.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
+    - Role ravendb.ravendb.ravendb_python_client_prerequisites must be installed before using this module.
 seealso:
   - name: RavenDB documentation
     description: Official RavenDB documentation
     link: https://ravendb.net/docs
 notes:
-    - The role C(community.ravendb.ravendb_python_client_prerequisites) must be applied before using this module.
+    - The role C(ravendb.ravendb.ravendb_python_client_prerequisites) must be applied before using this module.
     - Requires the ASP.NET Core Runtime to be installed on the target system.
 '''
 
 EXAMPLES = '''
 - name: Create a RavenDB database
-  community.ravendb.database:
+  ravendb.ravendb.database:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     replication_factor: 3
     state: present
 
 - name: Delete a RavenDB database
-  community.ravendb.database:
+  ravendb.ravendb.database:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     state: absent
 
 - name: Create a RavenDB database (secured server with self-signed certificates)
   become: true
-  community.ravendb.database:
+  ravendb.ravendb.database:
     url: "http://{{ ansible_host }}:443"
     database_name: "my_secured_database"
     replication_factor: 1
@@ -102,7 +102,7 @@ EXAMPLES = '''
 
 - name: Delete a RavenDB database (secured server with self-signed certificates)
   become: true
-  community.ravendb.database:
+  ravendb.ravendb.database:
     url: "http://{{ ansible_host }}:443"
     database_name: "my_secured_database"
     certificate_path: "/etc/ravendb/security/combined_raven_cert.pem"
@@ -110,7 +110,7 @@ EXAMPLES = '''
     state: absent
 
 - name: Simulate creating a RavenDB database (check mode)
-  community.ravendb.database:
+  ravendb.ravendb.database:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     replication_factor: 3
@@ -118,7 +118,7 @@ EXAMPLES = '''
   check_mode: yes
 
 - name: Simulate deleting a RavenDB database (check mode)
-  community.ravendb.database:
+  ravendb.ravendb.database:
     url: "http://{{ ansible_host }}:8080"
     database_name: "my_database"
     state: absent

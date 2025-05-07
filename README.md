@@ -2,7 +2,7 @@
 
 [![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://docs.ansible.com/ansible/devel/collections/community/ravendb/)
 
-This repo contains the `community.ravendb` Ansible Collection. The collection includes many modules and plugins to work with RavenDB.
+This repo contains the `ravendb.ravendb` Ansible Collection. The collection includes many modules and plugins to work with RavenDB.
 The modules present in Ansible 2.15.
 If you like this collection please give us a rating on [Ansible Galaxy](https://galaxy.ansible.com/community/ravendb).
 
@@ -39,7 +39,7 @@ All modules and plugins require Python 3.9 or later.
 
 Before using the RavenDB community collection, you need to install the collection with the `ansible-galaxy` CLI:
 
-    ansible-galaxy collection install community.ravendb
+    ansible-galaxy collection install ravendb.ravendb
 
 See [Ansible Using collections](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) for more details.
 
@@ -55,8 +55,8 @@ Examples for each module and feature included in this collection can be found in
 
 These roles prepare servers with Debian-based and RHEL-based distributions to run RavenDB.
 
-- `community.ravendb.ravendb_node`: Installs and configures a RavenDB server node. Handles service setup, secure and unsecured deployments, certificate management, and prerequisites installation.
-- `community.ravendb_python_client_prerequisites`: Installs the required Python packages (such as the RavenDB Python client library) needed to run Ansible modules that interact with RavenDB clusters.
+- `ravendb.ravendb.ravendb_node`: Installs and configures a RavenDB server node. Handles service setup, secure and unsecured deployments, certificate management, and prerequisites installation.
+- `ravendb.ravendb_python_client_prerequisites`: Installs the required Python packages (such as the RavenDB Python client library) needed to run Ansible modules that interact with RavenDB clusters.
 
 ### Plugins
 
@@ -64,12 +64,12 @@ These roles prepare servers with Debian-based and RHEL-based distributions to ru
 
 These modules manage RavenDB clusters, databases, and indexes:
 
-- `community.ravendb.database`: Creates or deletes RavenDB databases, including support for secured and unsecured servers, replication factor settings, and certificate authentication.
-- `community.ravendb.index`: Creates, updates, or deletes RavenDB indexes, including support for multi-map indexes and managing index modes (enable, disable, pause, resume, reset).
-- `community.ravendb.node`: Adds nodes to an existing RavenDB cluster, supporting both regular members and watcher nodes.
+- `ravendb.ravendb.database`: Creates or deletes RavenDB databases, including support for secured and unsecured servers, replication factor settings, and certificate authentication.
+- `ravendb.ravendb.index`: Creates, updates, or deletes RavenDB indexes, including support for multi-map indexes and managing index modes (enable, disable, pause, resume, reset).
+- `ravendb.ravendb.node`: Adds nodes to an existing RavenDB cluster, supporting both regular members and watcher nodes.
 
 
-## community.ravendb Role Tags
+## ravendb.ravendb Role Tags
 
 ### General role tags
 

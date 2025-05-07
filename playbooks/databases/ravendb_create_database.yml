@@ -4,11 +4,11 @@
   gather_facts: no
 
   roles:
-    - community.ravendb.ravendb_python_client_prerequisites
+    - ravendb.ravendb.ravendb_python_client_prerequisites
 
   tasks:
     - name: Ensure RavenDB database is present (check mode)
-      community.ravendb.database:
+      ravendb.ravendb.database:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         replication_factor: 3
@@ -16,14 +16,14 @@
       check_mode: yes
 
     - name: Ensure RavenDB database is present
-      community.ravendb.database:
+      ravendb.ravendb.database:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         replication_factor: 3
         state: present
 
     - name: Ensure RavenDB database is present (idempotency check)
-      community.ravendb.database:
+      ravendb.ravendb.database:
         url: "http://{{ ansible_host }}:8080"
         database_name: "my_database"
         replication_factor: 3

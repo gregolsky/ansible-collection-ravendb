@@ -9,10 +9,10 @@ The full changelog is maintained in [changelogs/changelog.yml](./changelogs/chan
 ## [1.0.0] - Initial Release
 
 ### Added
-- Initial release of the `community.ravendb` Ansible Collection.
+- Initial release of the `ravendb.ravendb` Ansible Collection.
 - Added `ravendb_node` role for setting up RavenDB servers.
 - Added `ravendb_python_client_prerequisites` role for managing Python dependencies.
 - Added modules:
-  - `community.ravendb.database` for managing RavenDB databases.
-  - `community.ravendb.index` for managing RavenDB indexes and index modes.
-  - `community.ravendb.node` for adding nodes to a RavenDB cluster.
+  - `ravendb.ravendb.database` for managing RavenDB databases.
+  - `ravendb.ravendb.index` for managing RavenDB indexes and index modes.
+  - `ravendb.ravendb.node` for adding nodes to a RavenDB cluster.

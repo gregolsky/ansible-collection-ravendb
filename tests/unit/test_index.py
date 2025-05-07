@@ -6,7 +6,7 @@ import os
 import sys
 from ravendb_test_driver import RavenTestDriver
 from unittest import TestCase
-from ansible_collections.community.ravendb.plugins.modules.index import (
+from ansible_collections.ravendb.ravendb.plugins.modules.index import (
     reconcile_state,
     is_valid_url,
     is_valid_name,
