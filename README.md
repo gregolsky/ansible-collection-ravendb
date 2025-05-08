@@ -1,10 +1,10 @@
 # RavenDB Community Collection
 
-[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://docs.ansible.com/ansible/devel/collections/community/ravendb/)
+[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://docs.ansible.com/ansible/devel/collections/ravendb/ravendb/)
 
 This repo contains the `ravendb.ravendb` Ansible Collection. The collection includes many modules and plugins to work with RavenDB.
 The modules present in Ansible 2.15.
-If you like this collection please give us a rating on [Ansible Galaxy](https://galaxy.ansible.com/community/ravendb).
+If you like this collection please give us a rating on [Ansible Galaxy](https://galaxy.ansible.com/ravendb/ravendb).
 
 ## Code of Conduct
 
